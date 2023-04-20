@@ -1,8 +1,13 @@
 from flask_cors import CORS
 from flask import Flask, Blueprint
+from werkzeug.security import gen_salt
 
-def create_app(config_filename):
+from .model import db
+from .routes import bp
+
+def create_app():
     app = Flask(__name__)
+
     CORS(app)
 
     # app configurations
@@ -13,14 +18,18 @@ def create_app(config_filename):
 
 def setup_app(app):
 
+    # configure secret key
+    app.config['SECRET_KEY'] = gen_salt(48)
+
     # register main blueprint
-    bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
     app.register_blueprint(bp)
 
-    # from model import db
-    # db.init_app(app)
+    # database uri
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
 
-    # from yourapplication.views.admin import admin
-    # from yourapplication.views.frontend import frontend
-    # app.register_blueprint(admin)
-    # app.register_blueprint(frontend)
+    # initialize database
+    @app.before_first_request
+    def create_tables():
+        db.create_all()
+
+    db.init_app(app)
