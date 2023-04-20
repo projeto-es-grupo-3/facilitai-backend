@@ -11,7 +11,7 @@ venv:
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
 	@echo "Starting virtual environment..."
-	@source $(VENV)/bin/activate
+	. $(VENV)/bin/activate
 
 run: venv
 	$(FLASK) --app src.main run
