@@ -45,7 +45,7 @@ def login():
     return jsonify("Invalid credentials"), 401
 
 
-@bp.route('/update', methods=['PUT'])
+@bp.route('/update', methods=['POST'])
 def update_user():
     """
     Endpoint que permite a atualização das informações de um usuário cadastrado.
