@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .model import (
@@ -43,6 +43,57 @@ def login():
         return jsonify("Successfully logged in."), 200
     
     return jsonify("Invalid credentials"), 401
+
+
+@bp.route('/update', methods=['PUT'])
+def update_user():
+    """
+    Endpoint que permite a atualização das informações de um usuário cadastrado.
+    As informações que podem ser atualizadas são: nome de usuário, campus, senha e curso.
+
+    Returns:
+        Um objeto JSON contendo uma mensagem de sucesso caso a atualização seja realizada com sucesso.
+
+    Raises:
+        HTTPException: uma exceção é levantada caso o usuário não esteja autenticado ou as informações
+        enviadas na requisição sejam inválidas.
+    """
+
+    # Obtém o usuário atual a partir da sessão
+    user = current_user()
+
+    # Verifica se o usuário está autenticado
+    if not user:
+        abort(401, 'Nenhum usuário logado.')
+
+    # Obtém as informações a serem atualizadas a partir do JSON enviado na requisição
+    new_username = request.json['username']
+    new_campus = request.json["campus"]
+    new_password = request.json["password"]
+    new_curso = request.json["curso"]
+
+    # Verifica se o username já existe para outro usuário
+    existing_username_user = User.query.filter_by(username=new_username).first()
+
+    if existing_username_user and existing_username_user != user:
+        abort(409, 'Esse nome de usuário já está sendo usado por outro usuário.')
+
+    # Atualiza as informações do usuário com as novas informações, se elas foram fornecidas
+    if new_username:
+        user.username = new_username
+
+    if new_campus:
+        user.campus = new_campus
+
+    if new_password:
+        user.pass_hash = generate_password_hash(new_password)
+
+    if new_curso:
+        user.curso = new_curso
+
+    db.session.commit()
+
+    return jsonify(message='Usuário atualizado com sucesso.'), 204
 
 @bp.route('/logout')
 def logout():
