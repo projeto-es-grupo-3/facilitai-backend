@@ -76,7 +76,7 @@ def update_user():
     existing_username_user = User.query.filter_by(username=new_username).first()
 
     if existing_username_user and existing_username_user != user:
-        abort(409, 'Esse nome de usuário já está sendo usado por outro usuário.')
+        abort(409, 'Esse nome de usuário está indisponível.')
 
     # Atualiza as informações do usuário com as novas informações, se elas foram fornecidas
     if new_username:
