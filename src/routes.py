@@ -31,6 +31,23 @@ def register():
     return jsonify(message='User created.'), 200
 
 
+@bp.route('/create_ad', methods=['POST'])
+def create_ad():
+    name = request.json["name"]
+    descricao = request.json["descricao"]
+    preco = request.json["preco"]
+    categoria = request.json["categoria"]
+    imagens = request.files.getlist('imagens')
+    for imagem in imagens:
+        imagem.save('caminho/para/salvar/' + imagem.filename)
+
+    new_user = User(username, email, matricula, campus, generate_password_hash(password), curso)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify(message='User created.'), 200
+
+
 @bp.route('/login', methods=['POST'])
 def login():
     email = request.json["email"]
