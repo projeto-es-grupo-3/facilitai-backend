@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
 class User(db.Model):
@@ -31,10 +32,14 @@ class Anuncio(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     
-    titulo = db.Column(db.String(70), unique=True, nullable=False)
+    titulo = db.Column(db.String(70), unique=False, nullable=False)
     
     anunciante = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    descricao = db.Column(db.String(500), unique=False, nullable=False)
+    
+    categoria = db.Column(db.Enum(CategoriaAnuncio), nullable=False)
+    
     preco = db.Column(db.Float, nullable=False)
 
 
@@ -47,7 +52,6 @@ class Livro(db.Model):
     autor = db.Column(db.String(20), unique=True, nullable=True)
 
     genero = db.Column(db.String(20), unique=True, nullable=True)
-
 
 class Apartamento(db.Model):
 
