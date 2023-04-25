@@ -41,7 +41,7 @@ def register():
 
     # Verifica se a matrícula fornecida tem o formato correto
     if len(matricula) != 9:
-        abort(400, 'Matricula incorreta')
+        abort(400, 'Matricula Inválida')
 
     # Verifica se o nome de usuário, email ou matrícula já estão em uso por outro usuário
     if User.query.filter_by(username=username).first():
