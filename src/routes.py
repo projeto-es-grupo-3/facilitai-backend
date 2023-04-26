@@ -3,7 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from .model import (
     User,
-    db
+    db,
+    AnuncioLivro,
+    AnuncioApartamento
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -37,15 +39,28 @@ def create_ad():
     descricao = request.json["descricao"]
     preco = request.json["preco"]
     categoria = request.json["categoria"]
-    imagens = request.files.getlist('imagens')
-    for imagem in imagens:
-        imagem.save('caminho/para/salvar/' + imagem.filename)
+    # imagens = request.files.getlist('imagens')
+    endereco = request.json["endereco"]
 
-    new_user = User(username, email, matricula, campus, generate_password_hash(password), curso)
-    db.session.add(new_user)
-    db.session.commit()
+    if categoria == 'livro':
+        titulo_livro = request.json['tituloLivro']
+        autor = request.json['autor']
+        genero = request.json['genero']
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
+        
+        db.session.add(new_livro)
+        db.session.commit()   
+    
+    elif categoria == 'apartamento':
+        endereco = request.json['endereco']
+        area = request.json['area']
+        comodos = request.json['comodos']
+        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
+        
+        db.session.add(new_apartament)
+        db.session.commit()
 
-    return jsonify(message='User created.'), 200
+    return jsonify(message='Ad created.'), 200
 
 
 @bp.route('/login', methods=['POST'])
