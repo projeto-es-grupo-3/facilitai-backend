@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager
 
 from .model import (
     User,
@@ -30,22 +31,39 @@ def register():
 
     return jsonify(message='User created.'), 200
 
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user.username
 
-@bp.route('/login', methods=['POST'])
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    username = jwt_data["sub"]
+    return User.query.filter_by(username=username).one_or_none()
+
+@app.route("/login", methods=["POST"])
 def login():
-    email = request.json["email"]
-    password = request.json["password"]
+    '''
+    Endpoint que permite logar no sistema, caso o usuário esteja cadastrado.
+    As informações utilizadas para realizar o login são: email e senha.
 
-    user = User.query.filter_by(email=email).first()
+    Returns:
+        Um objeto JSON contendo uma mensagem de sucesso caso a atualização seja realizada com sucesso.
 
-    if user and check_password_hash(user.pass_hash, password):
-        session['id'] = user.id
-        return jsonify("Successfully logged in."), 200
-    
-    return jsonify("Invalid credentials"), 401
+    Raises:
+        Não lança exceções.
+    '''
+    username = request.json.get("username", None)
+    password = request.json.get("senha", None)
 
+    user = User.query.filter_by(username=username).one_or_none()
+    if not user or not user.check_password(password):
+        return jsonify("Credenciais inválidas"), 401
+
+    access_token = create_access_token(identity=user)
+    return jsonify(access_token=access_token)
 
 @bp.route('/update', methods=['POST'])
+@jwt_required()
 def update_user():
     """
     Endpoint que permite a atualização das informações de um usuário cadastrado.
@@ -96,5 +114,6 @@ def update_user():
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
 @bp.route('/logout')
+@jwt_required()
 def logout():
     del session['id']
