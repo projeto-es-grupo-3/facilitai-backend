@@ -3,7 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from .model import (
     User,
-    db
+    db,
+    AnuncioLivro,
+    AnuncioApartamento
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -60,6 +62,36 @@ def register():
 
     # Retorna a mensagem de sucesso com o código 201
     return jsonify(message='Ususario cadastrado com sucesso.'), 201
+
+
+@bp.route('/create_ad', methods=['POST'])
+def create_ad():
+    name = request.json["name"]
+    descricao = request.json["descricao"]
+    preco = request.json["preco"]
+    categoria = request.json["categoria"]
+    # imagens = request.files.getlist('imagens')
+    endereco = request.json["endereco"]
+
+    if categoria == 'livro':
+        titulo_livro = request.json['tituloLivro']
+        autor = request.json['autor']
+        genero = request.json['genero']
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
+        
+        db.session.add(new_livro)
+        db.session.commit()   
+    
+    elif categoria == 'apartamento':
+        endereco = request.json['endereco']
+        area = request.json['area']
+        comodos = request.json['comodos']
+        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
+        
+        db.session.add(new_apartament)
+        db.session.commit()
+
+    return jsonify(message='Ad created.'), 200
 
 
 @bp.route('/login', methods=['POST'])
