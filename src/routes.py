@@ -75,10 +75,10 @@ def create_ad():
         BadRequest: Se algum dos campos necessários não for fornecido.
         Unauthorized: Se o usuário não estiver logado.
     """
-    titulo = request.json["name"]
-    descricao = request.json["descricao"]
-    preco = request.json["preco"]
-    categoria = request.json["categoria"]
+    titulo = request.json.get("titulo", None)
+    descricao = request.json.get("descricao", None)
+    preco = request.json.get("preco", None)
+    categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user()
 
@@ -86,9 +86,9 @@ def create_ad():
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
 
     if categoria == 'livro':
-        titulo_livro = request.json['tituloLivro']
-        autor = request.json['autor']
-        genero = request.json['genero']
+        titulo_livro = request.json.get('tituloLivro', None)
+        autor = request.json.get('autor', None)
+        genero = request.json.get('genero', None)
 
         if not all([titulo, descricao, preco, titulo_livro, autor, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
@@ -98,9 +98,9 @@ def create_ad():
         db.session.commit()   
     
     elif categoria == 'apartamento':
-        endereco = request.json['endereco']
-        area = request.json['area']
-        comodos = request.json['comodos']
+        endereco = request.json.get('endereco', None)
+        area = request.json.get('area', None)
+        comodos = request.json.get('comodos', None)
 
         if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
