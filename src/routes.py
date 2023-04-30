@@ -35,12 +35,12 @@ def register():
 
 @bp.route('/create_ad', methods=['POST'])
 def create_ad():
-    name = request.json["name"]
+    titulo = request.json["name"]
     descricao = request.json["descricao"]
     preco = request.json["preco"]
     categoria = request.json["categoria"]
     # imagens = request.files.getlist('imagens')
-    endereco = request.json["endereco"]
+    anunciante = current_user()
 
     if categoria == 'livro':
         titulo_livro = request.json['tituloLivro']
@@ -60,7 +60,7 @@ def create_ad():
         db.session.add(new_apartament)
         db.session.commit()
 
-    return jsonify(message='Ad created.'), 200
+    return jsonify(message='Anúncio criado.'), 200
 
 
 @bp.route('/login', methods=['POST'])

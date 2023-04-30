@@ -5,6 +5,8 @@ db = SQLAlchemy()
 
 class User(db.Model):
 
+    __tablename__ = 'user'
+
     id = db.Column(db.Integer, primary_key=True)
 
     username = db.Column(db.String(30), unique=True, nullable=False)
@@ -19,6 +21,8 @@ class User(db.Model):
 
     curso = db.Column(db.String, nullable=False)
 
+    anuncios = db.relationship('Anuncio', back_populates='user')
+
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username
         self.matricula = matricula
@@ -30,6 +34,8 @@ class User(db.Model):
 
 class Anuncio(db.Model):
 
+    __tablename__ = 'anuncio'
+
     id = db.Column(db.Integer, primary_key=True)
     
     titulo = db.Column(db.String(70), unique=False, nullable=False)
@@ -39,6 +45,10 @@ class Anuncio(db.Model):
     descricao = db.Column(db.String(500), unique=False, nullable=False)
     
     preco = db.Column(db.Float, nullable=False)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user = db.relationship('User', back_populates='anuncios')
 
 
 class AnuncioLivro(Anuncio, db.Model):
@@ -58,6 +68,7 @@ class AnuncioLivro(Anuncio, db.Model):
         super.anunciante = anunciante
         super.descricao = descricao
         super.preco = preco
+        super.user = anunciante
         self.titulo_livro = titulo_livro
         self.autor = autor
         self.genero = genero
