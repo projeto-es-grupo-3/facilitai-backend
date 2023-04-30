@@ -77,7 +77,7 @@ def create_ad():
     """
     titulo = request.json.get("titulo", None)
     descricao = request.json.get("descricao", None)
-    preco = request.json.get("preco", None)
+    preco = float(request.json.get("preco", None))
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user()
@@ -89,8 +89,9 @@ def create_ad():
         titulo_livro = request.json.get('tituloLivro', None)
         autor = request.json.get('autor', None)
         genero = request.json.get('genero', None)
+        import pdb; pdb.set_trace()
 
-        if not all([titulo, descricao, preco, titulo_livro, autor, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
         new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
         
