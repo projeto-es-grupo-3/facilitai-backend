@@ -1,0 +1,3 @@
+- [ ] Requests da funcionalidade adicionados ao _Postman_
+- [ ] Qualquer chamada a `print()` em debug removida
+- [ ] Testes passando
