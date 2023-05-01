@@ -11,22 +11,19 @@ from .model import (
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
 
-def current_user():
-    if 'id' in session:
-        uid = session['id']
-        return User.query.get(uid)
-    return None
+
+def init_jwt(app):
+    jwt = JWTManager(app)
+
+    @jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user.username
 
 
-@jwt.user_identity_loader
-def user_identity_lookup(user):
-    return user.username
-
-
-@jwt.user_lookup_loader
-def user_lookup_callback(_jwt_header, jwt_data):
-    username = jwt_data["sub"]
-    return User.query.filter_by(username=username).one_or_none()
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        username = jwt_data["sub"]
+        return User.query.filter_by(username=username).one_or_none()
 
 
 @bp.route('/register', methods=['POST'])
@@ -77,6 +74,7 @@ def register():
 
 
 @bp.route('/create_ad', methods=['POST'])
+@jwt_required()
 def create_ad():
     """Cria um novo anúncio no sistema.
 
@@ -92,7 +90,7 @@ def create_ad():
     preco = float(request.json.get("preco", None))
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
-    anunciante = current_user()
+    anunciante = current_user
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -124,7 +122,7 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-@app.route("/login", methods=["POST"])
+@bp.route("/login", methods=["POST"])
 def login():
     """
     Endpoint que permite logar no sistema, caso o usuário esteja cadastrado.
@@ -133,12 +131,12 @@ def login():
     Returns:
         Um objeto JSON contendo uma mensagem de sucesso caso a atualização seja realizada com sucesso.
     """
-    email = request.json.get("email", None)
+    username = request.json.get("username", None)
     password = request.json.get("password", None)
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(username=username).first()
+
     if user and check_password_hash(user.pass_hash, password):
-        session['id'] = user.id
         access_token = create_access_token(identity=user)
         return jsonify(message="Logado com sucesso", access_token=access_token)
     
@@ -161,7 +159,7 @@ def update_user():
     """
 
     # Obtém o usuário atual a partir da sessão
-    user = current_user()
+    user = current_user
 
     # Verifica se o usuário está autenticado
     if not user:
