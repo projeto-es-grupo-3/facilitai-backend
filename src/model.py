@@ -1,8 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 
+
 db = SQLAlchemy()
 
 class User(db.Model):
+
+    __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -18,6 +21,8 @@ class User(db.Model):
 
     curso = db.Column(db.String, nullable=False)
 
+    anuncios = db.relationship('Anuncio', back_populates='anunciante')
+
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username
         self.matricula = matricula
@@ -29,32 +34,72 @@ class User(db.Model):
 
 class Anuncio(db.Model):
 
+    __tablename__ = 'anuncio'
+
     id = db.Column(db.Integer, primary_key=True)
     
-    titulo = db.Column(db.String(70), unique=True, nullable=False)
+    titulo = db.Column(db.String(70), unique=False, nullable=False)
     
-    anunciante = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    anunciante = db.relationship('User', back_populates='anuncios')
 
+    descricao = db.Column(db.String(500), unique=False, nullable=False)
+    
     preco = db.Column(db.Float, nullable=False)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-class Livro(db.Model):
+    # coluna que serve como diferenciador de tipo na tabela para representar os tipos
+    type_discriminator :  db.Mapped[str]
 
-    id = db.Column(db.Integer, primary_key=True)
-    
-    titulo = db.Column(db.String(20), unique=True, nullable=False)
+    __mapper_args__ = {
+        'polymorphic_on': 'type_discriminator',
+        'polymorphic_identity': 'anuncio'
+    }
+
+    def __init__(self, titulo, anunciante, descricao, preco):
+        self.titulo = titulo
+        self.anunciante = anunciante
+        self.descricao = descricao
+        self.preco = preco
+
+
+class AnuncioLivro(Anuncio, db.Model):
+
+    id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
+
+    titulo_livro = db.Column(db.String(20), unique=True, nullable=False)
     
     autor = db.Column(db.String(20), unique=True, nullable=True)
 
     genero = db.Column(db.String(20), unique=True, nullable=True)
 
+    __mapper_args__ = {
+        'polymorphic_identity':'anuncio_livro',
+    }
 
-class Apartamento(db.Model):
+    def __init__(self, titulo, anunciante, descricao, preco, titulo_livro, autor, genero):
+        super().__init__(titulo, anunciante, descricao, preco)
+        self.titulo_livro = titulo_livro
+        self.autor = autor
+        self.genero = genero
 
-    id = db.Column(db.Integer, primary_key=True)
+
+class AnuncioApartamento(Anuncio, db.Model):
+
+    id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
     
     endereco = db.Column(db.String(70), unique=True, nullable=False)
     
     area = db.Column(db.Integer, nullable=True)
     
     comodos = db.Column(db.Integer, nullable=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'anuncio_apartamento',
+    }
+
+    def __init__(self, titulo, anunciante, descricao, preco, endereco, area, comodos):
+        super().__init__(titulo, anunciante, descricao, preco)
+        self.endereco = endereco
+        self.area = area
+        self.comodos = comodos
