@@ -1,9 +1,11 @@
 from flask_cors import CORS
-from flask import Flask, Blueprint
+from flask import Flask 
 from werkzeug.security import gen_salt
 
+from flask_jwt_extended import JWTManager
+
 from .model import db
-from .routes import bp
+from .routes import bp, init_jwt
 
 def create_app():
     app = Flask(__name__)
@@ -23,6 +25,9 @@ def setup_app(app):
 
     # register main blueprint
     app.register_blueprint(bp)
+
+    # initialize JWTManager
+    init_jwt(app)
 
     # database uri
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
