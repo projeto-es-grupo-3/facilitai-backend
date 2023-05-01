@@ -67,11 +67,11 @@ class AnuncioLivro(Anuncio, db.Model):
 
     id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
 
-    titulo_livro = db.Column(db.String(20), unique=True, nullable=False)
+    titulo_livro = db.Column(db.String(20), unique=False, nullable=False)
     
-    autor = db.Column(db.String(20), unique=True, nullable=True)
+    autor = db.Column(db.String(20), unique=False, nullable=True)
 
-    genero = db.Column(db.String(20), unique=True, nullable=True)
+    genero = db.Column(db.String(20), unique=False, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity':'anuncio_livro',
