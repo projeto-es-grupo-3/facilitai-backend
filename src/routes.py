@@ -61,37 +61,55 @@ def register():
     db.session.commit()
 
     # Retorna a mensagem de sucesso com o código 201
-    return jsonify(message='Ususario cadastrado com sucesso.'), 201
+    return jsonify(message='Usuário cadastrado com sucesso.'), 201
 
 
 @bp.route('/create_ad', methods=['POST'])
 def create_ad():
-    name = request.json["name"]
-    descricao = request.json["descricao"]
-    preco = request.json["preco"]
-    categoria = request.json["categoria"]
+    """Cria um novo anúncio no sistema.
+
+    Returns:
+        Um objeto JSON com a mensagem de sucesso e código 201.
+
+    Raises:
+        BadRequest: Se algum dos campos necessários não for fornecido.
+        Unauthorized: Se o usuário não estiver logado.
+    """
+    titulo = request.json.get("titulo", None)
+    descricao = request.json.get("descricao", None)
+    preco = float(request.json.get("preco", None))
+    categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
-    endereco = request.json["endereco"]
+    anunciante = current_user()
+
+    if not categoria: abort(400, 'Categoria é necessária.')
+    if not anunciante: abort(401, 'O usuário precisa estar logado.')
 
     if categoria == 'livro':
-        titulo_livro = request.json['tituloLivro']
-        autor = request.json['autor']
-        genero = request.json['genero']
+        titulo_livro = request.json.get('tituloLivro', None)
+        autor = request.json.get('autor', None)
+        genero = request.json.get('genero', None)
+
+        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
+
         new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
         
         db.session.add(new_livro)
         db.session.commit()   
     
     elif categoria == 'apartamento':
-        endereco = request.json['endereco']
-        area = request.json['area']
-        comodos = request.json['comodos']
+        endereco = request.json.get('endereco', None)
+        area = int(request.json.get('area', None))
+        comodos = int(request.json.get('comodos', None))
+
+        if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400, 'Todos os campos precisam ser preenchidos.')
+
         new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
         
         db.session.add(new_apartament)
         db.session.commit()
 
-    return jsonify(message='Ad created.'), 200
+    return jsonify(message='Anúncio criado.'), 201
 
 
 @bp.route('/login', methods=['POST'])
@@ -103,9 +121,9 @@ def login():
 
     if user and check_password_hash(user.pass_hash, password):
         session['id'] = user.id
-        return jsonify("Successfully logged in."), 200
+        return jsonify("Logado com sucesso."), 200
     
-    return jsonify("Invalid credentials"), 401
+    return jsonify("Credenciais Inválidas"), 401
 
 
 @bp.route('/update', methods=['POST'])
@@ -139,7 +157,7 @@ def update_user():
     existing_username_user = User.query.filter_by(username=new_username).first()
 
     if existing_username_user and existing_username_user != user:
-        abort(409, 'Esse nome de usuário está indisponível.')
+        abort(409, 'Nome de usuário indisponível.')
 
     # Atualiza as informações do usuário com as novas informações, se elas foram fornecidas
     if new_username:
