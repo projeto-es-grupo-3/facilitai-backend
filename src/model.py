@@ -103,3 +103,15 @@ class AnuncioApartamento(Anuncio, db.Model):
         self.endereco = endereco
         self.area = area
         self.comodos = comodos
+
+class TokenBlockList(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    jti = db.Column(db.String(36), nullable=False, index=True)
+
+    created_at = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, jti, created_at):
+        self.jti = jti
+        self.created_at = created_at

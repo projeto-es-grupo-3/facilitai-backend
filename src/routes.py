@@ -1,12 +1,14 @@
-from flask import Blueprint, request, jsonify, session, abort
+from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager
+from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
+from datetime import datetime, timezone
 
 from .model import (
     User,
     db,
     AnuncioLivro,
-    AnuncioApartamento
+    AnuncioApartamento,
+    TokenBlockList
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -24,6 +26,13 @@ def init_jwt(app):
     def user_lookup_callback(_jwt_header, jwt_data):
         username = jwt_data["sub"]
         return User.query.filter_by(username=username).one_or_none()
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload['jti']
+        token = TokenBlockList.query.filter_by(jti=jti).scalar()
+
+        return token is not None
 
 
 @bp.route('/register', methods=['POST'])
@@ -194,7 +203,14 @@ def update_user():
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
-@bp.route('/logout')
+@bp.route('/logout', methods=['DELETE'])
 @jwt_required()
 def logout():
-    del session['id']
+    """
+    Revoga o token de autenticação do usuário.
+    """
+    jti = get_jwt()["jti"]
+    now = datetime.now(timezone.utc)
+    db.session.add(TokenBlockList(jti, now))
+    db.session.commit()
+    return jsonify(msg="JWT revogado.")
