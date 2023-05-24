@@ -89,4 +89,4 @@ As seguintes rotas estão implementadas:
 ### Logout
 `GET /logout` desloga o usuário.
 
-> `/logout` está implementado com base em sessões, portanto não há funcionalidade implementada para o endpoint com a autenticação por token.
+> `DELETE /logout` revoga o token de autenticação do usuário.
