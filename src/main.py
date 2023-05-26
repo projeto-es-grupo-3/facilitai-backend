@@ -2,7 +2,7 @@ from flask_cors import CORS
 from flask import Flask 
 from werkzeug.security import gen_salt
 
-from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 from .model import db
 from .routes import bp, init_jwt
@@ -31,6 +31,10 @@ def setup_app(app):
 
     # database uri
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
+
+    # jwt configuration
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+    app.config['JWT_SECRET_KEY'] = gen_salt(48)
 
     # initialize database
     @app.before_first_request
