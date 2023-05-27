@@ -37,7 +37,7 @@ As seguintes rotas estão implementadas:
 }
 ```
 ### Criação de anúncio
-`POST /create_ad` aceita dois objetos de criação de anúncio nos seguintes formatos:
+`POST /create_ad Authorization: Berarer {access_token}` aceita dois objetos de criação de anúncio nos seguintes formatos:
 
 - Anúncio de livro
 
@@ -74,10 +74,10 @@ As seguintes rotas estão implementadas:
     "password": "senhasecreta"
 }
 ```
-> Responde com token de autenticação como `access_token`
+> Responde com json com token de autenticação `access_token`
 
 ### Atualização de usuário
-`POST /update` aceita objeto de atualização de usuário no seguinte formato:
+`POST /update Authorization: Bearer {access_token}` aceita objeto de atualização de usuário no seguinte formato:
 ```json
 {
     "username": "novo.username",
@@ -88,4 +88,4 @@ As seguintes rotas estão implementadas:
 ```
 ### Logout
 
-`DELETE /logout` revoga o token de autenticação do usuário.
+`DELETE /logout Authorization: Bearer {access_token}` revoga o token de autenticação do usuário.
