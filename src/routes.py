@@ -203,6 +203,61 @@ def update_user():
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
+@bp.route('/search_books', methods=['GET'])
+def search_books():
+    # Obter os parâmetros de consulta da requisição
+    nome_livro = request.json.get('nome_livro')
+    nome_autor = request.json.get('nome_autor')
+    genero = request.json.get('genero')
+    preco_min = request.json.get('preco_min')
+    preco_max = request.json.get('preco_max')
+    aceita_trocas = request.json.get('aceita_trocas')
+
+    # Iniciar com uma consulta base para recuperar os anúncios de livros
+    query = AnuncioLivro.query
+    print("oiiiiiiiii")
+    # Aplicar filtros com base nos critérios do usuário
+    if nome_livro:
+        print("OIIIIIIIIII")
+        query = query.filter(AnuncioLivro.titulo_livro.ilike(f'%{nome_livro}%'))
+
+    if nome_autor:
+        print("entrouuuuu")
+        query = query.filter(AnuncioLivro.autor.ilike(f'%{nome_autor}%'))
+
+    if genero:
+        query = query.filter(AnuncioLivro.genero.ilike(f'%{genero}%'))
+
+    if preco_min:
+        query = query.filter(AnuncioLivro.preco >= float(preco_min))
+
+    if preco_max:
+        query = query.filter(AnuncioLivro.preco <= float(preco_max))
+
+    if aceita_trocas:
+        query = query.filter(AnuncioLivro.aceita_trocas == True)
+
+    # Executar a consulta e recuperar os anúncios de livros filtrados
+    resultados = query.all()
+
+    # Criar uma lista para armazenar os resultados serializados
+    resultados_serializados = []
+
+    # Serializar cada anúncio de livro nos resultados
+    for resultado in resultados:
+        resultado_serializado = {
+            'titulo': resultado.titulo,
+            'descricao': resultado.descricao,
+            'preco': resultado.preco,
+            'titulo_livro': resultado.titulo_livro,
+            'autor': resultado.autor,
+            'genero': resultado.genero,
+            # Incluir outros campos relevantes, se necessário
+        }
+        resultados_serializados.append(resultado_serializado)
+
+    return jsonify(livros=resultados_serializados)
+
 @bp.route('/logout', methods=['DELETE'])
 @jwt_required()
 def logout():
