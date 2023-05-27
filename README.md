@@ -87,6 +87,5 @@ As seguintes rotas estão implementadas:
 }
 ```
 ### Logout
-`GET /logout` desloga o usuário.
 
-> `DELETE /logout` revoga o token de autenticação do usuário.
+`DELETE /logout` revoga o token de autenticação do usuário.
