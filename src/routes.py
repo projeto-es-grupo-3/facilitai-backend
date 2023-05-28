@@ -21,7 +21,6 @@ def init_jwt(app):
     def user_identity_lookup(user):
         return user.username
 
-
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
         username = jwt_data["sub"]
@@ -37,7 +36,6 @@ def init_jwt(app):
 
 @bp.route('/register', methods=['POST'])
 def register():
-
     """Cria um novo usuário no sistema.
 
     Returns:
@@ -109,22 +107,24 @@ def create_ad():
         autor = request.json.get('autor', None)
         genero = request.json.get('genero', None)
 
-        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400,
+                                                                            'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
-        
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero)
+
         db.session.add(new_livro)
-        db.session.commit()   
-    
+        db.session.commit()
+
     elif categoria == 'apartamento':
         endereco = request.json.get('endereco', None)
         area = int(request.json.get('area', None))
         comodos = int(request.json.get('comodos', None))
 
-        if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400,
+                                                                               'Todos os campos precisam ser preenchidos.')
 
         new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
-        
+
         db.session.add(new_apartament)
         db.session.commit()
 
@@ -148,7 +148,7 @@ def login():
     if user and check_password_hash(user.pass_hash, password):
         access_token = create_access_token(identity=user)
         return jsonify(message="Logado com sucesso", access_token=access_token)
-    
+
     return jsonify("Invalid credentials"), 401
 
 
@@ -203,6 +203,7 @@ def update_user():
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
+
 @bp.route('/search_books', methods=['GET'])
 def search_books():
     # Obter os parâmetros de consulta da requisição
@@ -215,14 +216,12 @@ def search_books():
 
     # Iniciar com uma consulta base para recuperar os anúncios de livros
     query = AnuncioLivro.query
-    print("oiiiiiiiii")
+
     # Aplicar filtros com base nos critérios do usuário
     if nome_livro:
-        print("OIIIIIIIIII")
         query = query.filter(AnuncioLivro.titulo_livro.ilike(f'%{nome_livro}%'))
 
     if nome_autor:
-        print("entrouuuuu")
         query = query.filter(AnuncioLivro.autor.ilike(f'%{nome_autor}%'))
 
     if genero:
@@ -246,17 +245,65 @@ def search_books():
     # Serializar cada anúncio de livro nos resultados
     for resultado in resultados:
         resultado_serializado = {
+            'id': resultado.id,
             'titulo': resultado.titulo,
             'descricao': resultado.descricao,
             'preco': resultado.preco,
             'titulo_livro': resultado.titulo_livro,
             'autor': resultado.autor,
             'genero': resultado.genero,
-            # Incluir outros campos relevantes, se necessário
         }
         resultados_serializados.append(resultado_serializado)
 
     return jsonify(livros=resultados_serializados)
+
+
+@bp.route('/search_apartaments', methods=['GET'])
+def search_apartaments():
+    """Realiza a filtragem de imóveis anunciados com base nos filtros fornecidos no JSON.
+
+    O corpo da requisição pode conter um JSON com os seguintes campos opcionais:
+        - endereco: Filtra por endereco do imóvel.
+        - valor_min: Filtra por valor mínimo do imóvel.
+        - valor_max: Filtra por valor máximo do imóvel.
+        - num_comodos: Filtra por número de comodos do imóvel.
+
+    Returns:
+        Uma lista de imóveis filtrados em formato JSON.
+    """
+    filters = request.json
+    endereco = filters['endereco']
+    valor_min = filters['valor_min']
+    valor_max = filters['valor_max']
+    num_comodos = filters['num_comodos']
+
+    query = AnuncioApartamento.query
+
+    if endereco:
+        query = query.filter(AnuncioApartamento.endereco.ilike(f'%{endereco}%'))
+
+    if valor_min:
+        query = query.filter(AnuncioApartamento.preco >= float(valor_min))
+
+    if valor_max:
+        query = query.filter(AnuncioApartamento.preco <= float(valor_max))
+
+    if num_comodos:
+        query = query.filter(AnuncioApartamento.comodos >= int(num_comodos))
+
+    lista_apartamentos = query.all()
+
+    apartamentos_json = []
+    for apartamento in lista_apartamentos:
+        apartamentos_json.append({
+            'id': apartamento.id,
+            'endereco': apartamento.endereco,
+            'preco': apartamento.preco,
+            'comodos': apartamento.comodos
+        })
+
+    return jsonify(apartamentos=apartamentos_json)
+
 
 @bp.route('/logout', methods=['DELETE'])
 @jwt_required()
