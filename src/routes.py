@@ -1,20 +1,38 @@
-from flask import Blueprint, request, jsonify, session, abort
+from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
+from datetime import datetime, timezone
 
 from .model import (
     User,
     db,
     AnuncioLivro,
-    AnuncioApartamento
+    AnuncioApartamento,
+    TokenBlockList
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
 
-def current_user():
-    if 'id' in session:
-        uid = session['id']
-        return User.query.get(uid)
-    return None
+
+def init_jwt(app):
+    jwt = JWTManager(app)
+
+    @jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user.username
+
+
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        username = jwt_data["sub"]
+        return User.query.filter_by(username=username).one_or_none()
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload['jti']
+        token = TokenBlockList.query.filter_by(jti=jti).scalar()
+
+        return token is not None
 
 
 @bp.route('/register', methods=['POST'])
@@ -65,6 +83,7 @@ def register():
 
 
 @bp.route('/create_ad', methods=['POST'])
+@jwt_required()
 def create_ad():
     """Cria um novo anúncio no sistema.
 
@@ -80,7 +99,7 @@ def create_ad():
     preco = float(request.json.get("preco", None))
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
-    anunciante = current_user()
+    anunciante = current_user
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -112,21 +131,29 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-@bp.route('/login', methods=['POST'])
+@bp.route("/login", methods=["POST"])
 def login():
-    email = request.json["email"]
-    password = request.json["password"]
+    """
+    Endpoint que permite logar no sistema, caso o usuário esteja cadastrado.
+    As informações utilizadas para realizar o login são: email e senha.
 
-    user = User.query.filter_by(email=email).first()
+    Returns:
+        Um objeto JSON contendo uma mensagem de sucesso caso a atualização seja realizada com sucesso.
+    """
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(username=username).first()
 
     if user and check_password_hash(user.pass_hash, password):
-        session['id'] = user.id
-        return jsonify("Logado com sucesso."), 200
+        access_token = create_access_token(identity=user)
+        return jsonify(message="Logado com sucesso", access_token=access_token)
     
-    return jsonify("Credenciais Inválidas"), 401
+    return jsonify("Invalid credentials"), 401
 
 
 @bp.route('/update', methods=['POST'])
+@jwt_required()
 def update_user():
     """
     Endpoint que permite a atualização das informações de um usuário cadastrado.
@@ -141,7 +168,7 @@ def update_user():
     """
 
     # Obtém o usuário atual a partir da sessão
-    user = current_user()
+    user = current_user
 
     # Verifica se o usuário está autenticado
     if not user:
@@ -176,6 +203,14 @@ def update_user():
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
-@bp.route('/logout')
+@bp.route('/logout', methods=['DELETE'])
+@jwt_required()
 def logout():
-    del session['id']
+    """
+    Revoga o token de autenticação do usuário.
+    """
+    jti = get_jwt()["jti"]
+    now = datetime.now(timezone.utc)
+    db.session.add(TokenBlockList(jti, now))
+    db.session.commit()
+    return jsonify(msg="JWT revogado.")
