@@ -4,8 +4,8 @@ from werkzeug.security import gen_salt
 
 from datetime import timedelta
 
-from .model import db
-from .routes import bp, init_jwt
+from model import db
+from routes import bp, init_jwt
 
 def create_app():
     app = Flask(__name__)
@@ -30,7 +30,7 @@ def setup_app(app):
     init_jwt(app)
 
     # database uri
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/postgres'
 
     # jwt configuration
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)

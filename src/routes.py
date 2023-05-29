@@ -8,7 +8,8 @@ from .model import (
     db,
     AnuncioLivro,
     AnuncioApartamento,
-    TokenBlockList
+    TokenBlockList,
+    Anuncio
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -214,3 +215,23 @@ def logout():
     db.session.add(TokenBlockList(jti, now))
     db.session.commit()
     return jsonify(msg="JWT revogado.")
+
+@bp.route('/fav_ad', methods=['POST'])
+@jwt_required()
+def fav_ad():
+    anuncio_id = request.json.get('anuncio_id')
+    anuncio = Anuncio.query.get(anuncio_id)
+    # Obtém o usuário atual a partir da sessão
+    user = current_user
+
+    # Verifica se o usuário está autenticado
+    if not user:
+        abort(401, 'Nenhum usuário logado.')
+    if not anuncio:
+        abort(401, 'O anúncio não foi encontrado')
+
+    user.anuncios_favoritos.append(anuncio)
+    db.session.commit()
+
+    return jsonify(message='Anúncio favoritado com sucesso.'), 204
+
