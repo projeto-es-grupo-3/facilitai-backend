@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from enum import Enum
 
 
 db = SQLAlchemy()
@@ -32,6 +33,13 @@ class User(db.Model):
         self.curso = curso
 
 
+class StatusAnuncio(Enum):
+    AGUARDANDO_ACAO = 'Aguardando Ação'
+    TROCADO = 'Trocado'
+    VENDIDO = 'Vendido'
+    DOADO = 'Doado'
+
+
 class Anuncio(db.Model):
 
     __tablename__ = 'anuncio'
@@ -46,6 +54,8 @@ class Anuncio(db.Model):
     
     preco = db.Column(db.Float, nullable=False)
 
+    status = db.Column(db.Enum(StatusAnuncio), default=StatusAnuncio.AGUARDANDO_ACAO, nullable=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # coluna que serve como diferenciador de tipo na tabela para representar os tipos
@@ -56,11 +66,12 @@ class Anuncio(db.Model):
         'polymorphic_identity': 'anuncio'
     }
 
-    def __init__(self, titulo, anunciante, descricao, preco):
+    def __init__(self, titulo, anunciante, descricao, preco, status):
         self.titulo = titulo
         self.anunciante = anunciante
         self.descricao = descricao
         self.preco = preco
+        self.status = status
 
 
 class AnuncioLivro(Anuncio, db.Model):
@@ -77,8 +88,8 @@ class AnuncioLivro(Anuncio, db.Model):
         'polymorphic_identity':'anuncio_livro',
     }
 
-    def __init__(self, titulo, anunciante, descricao, preco, titulo_livro, autor, genero):
-        super().__init__(titulo, anunciante, descricao, preco)
+    def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero):
+        super().__init__(titulo, anunciante, descricao, preco, status)
         self.titulo_livro = titulo_livro
         self.autor = autor
         self.genero = genero
@@ -98,8 +109,8 @@ class AnuncioApartamento(Anuncio, db.Model):
         'polymorphic_identity':'anuncio_apartamento',
     }
 
-    def __init__(self, titulo, anunciante, descricao, preco, endereco, area, comodos):
-        super().__init__(titulo, anunciante, descricao, preco)
+    def __init__(self, titulo, anunciante, descricao, preco, status, endereco, area, comodos):
+        super().__init__(titulo, anunciante, descricao, preco, status)
         self.endereco = endereco
         self.area = area
         self.comodos = comodos
