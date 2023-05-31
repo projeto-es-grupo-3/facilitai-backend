@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
+from model import StatusAnuncio
+
 
 from .model import (
     User,
@@ -100,6 +102,7 @@ def create_ad():
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user
+    status = StatusAnuncio.AGUARDANDO_ACAO
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -111,7 +114,7 @@ def create_ad():
 
         if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero) 
         
         db.session.add(new_livro)
         db.session.commit()   
@@ -123,7 +126,7 @@ def create_ad():
 
         if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
+        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, status, endereco, area, comodos)
         
         db.session.add(new_apartament)
         db.session.commit()
