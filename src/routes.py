@@ -131,6 +131,39 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
+
+
+@bp.route('/edit_ad', methods=['PUT'])
+@jwt_required()
+def edit_ad(id_anuncio):
+    """Edita um anúncio existente.
+
+    Args:
+        id: O ID do anúncio a ser editado.
+
+    Returns:
+        Um objeto JSON com a mensagem de sucesso e código 200.
+
+    Raises:
+        NotFound: Se o anúncio não for encontrado.
+        Unauthorized: Se o usuário não estiver autorizado a editar o anúncio.
+    """
+    anuncio = Anuncio.query.get(id_anuncio)
+
+    if not anuncio: abort(404, 'Anúncio não encontrado.')
+    if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio.')
+
+    titulo = request.json.get("titulo", None)
+    descricao = request.json.get("descricao", None)
+    preco = float(request.json.get("preco", None))
+    categoria = request.json.get("categoria", None)
+    status = request.json.get("status", None)
+
+    editar_anuncio(anuncio, titulo, descricao, preco, categoria, status)
+
+    return jsonify(message="Anúncio editado com sucesso."), 200
+
+
 @bp.route("/login", methods=["POST"])
 def login():
     """
