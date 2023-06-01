@@ -8,6 +8,7 @@ from .model import (
     db,
     AnuncioLivro,
     AnuncioApartamento,
+    Anuncio,
     TokenBlockList
 )
 
@@ -131,12 +132,11 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-
-
 @bp.route('/edit_ad', methods=['PUT'])
 @jwt_required()
 def edit_ad(id_anuncio):
-    """Edita um anúncio existente.
+    """
+    Edita um anúncio existente.
 
     Args:
         id: O ID do anúncio a ser editado.
@@ -159,7 +159,13 @@ def edit_ad(id_anuncio):
     categoria = request.json.get("categoria", None)
     status = request.json.get("status", None)
 
-    editar_anuncio(anuncio, titulo, descricao, preco, categoria, status)
+    anuncio.titulo = titulo
+    anuncio.descricao = descricao
+    anuncio.preco = preco
+    anuncio.categoria = categoria
+    anuncio.status = StatusAnuncio(status)
+
+    db.session.commit()
 
     return jsonify(message="Anúncio editado com sucesso."), 200
 
