@@ -12,6 +12,15 @@ from .model import (
     TokenBlockList
 )
 
+from .config import (
+    REGISTER,
+    LOGIN,
+    LOGOUT,
+    CREATE_AD,
+    UPDATE,
+    DELETE_AD
+)
+
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
 
 
@@ -36,7 +45,7 @@ def init_jwt(app):
         return token is not None
 
 
-@bp.route('/register', methods=['POST'])
+@bp.route(REGISTER, methods=['POST'])
 def register():
 
     """Cria um novo usuário no sistema.
@@ -83,7 +92,7 @@ def register():
     return jsonify(message='Usuário cadastrado com sucesso.'), 201
 
 
-@bp.route('/create_ad', methods=['POST'])
+@bp.route(CREATE_AD, methods=['POST'])
 @jwt_required()
 def create_ad():
     """Cria um novo anúncio no sistema.
@@ -132,7 +141,7 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-@bp.route("/login", methods=["POST"])
+@bp.route(LOGIN, methods=["POST"])
 def login():
     """
     Endpoint que permite logar no sistema, caso o usuário esteja cadastrado.
@@ -153,7 +162,7 @@ def login():
     return jsonify("Invalid credentials"), 401
 
 
-@bp.route('/update', methods=['POST'])
+@bp.route(UPDATE, methods=['POST'])
 @jwt_required()
 def update_user():
     """
@@ -205,7 +214,7 @@ def update_user():
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
 
-@bp.route('delete-ad', methods=['DELETE'])
+@bp.route(DELETE_AD, methods=['DELETE'])
 @jwt_required()
 def delete_ad():
     ad_id = request.json.get('id', None)
@@ -223,7 +232,7 @@ def delete_ad():
     return jsonify(message='Anúncio deletado.')
 
 
-@bp.route('/logout', methods=['DELETE'])
+@bp.route(LOGOUT, methods=['DELETE'])
 @jwt_required()
 def logout():
     """
