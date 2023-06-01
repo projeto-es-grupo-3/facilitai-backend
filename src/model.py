@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-favoritos = db.Table('favoritos',
+favoritos = db.Table(
+    'favoritos',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('anuncio_id', db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
 )
@@ -28,7 +29,10 @@ class User(db.Model):
 
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
-    anuncios_favoritos = db.relationship('Anuncio', secondary=favoritos, backref=db.backref('usuarios_favoritos', lazy='dynamic'))
+    anuncios_favoritos = db.relationship(
+        'Anuncio',
+        secondary=favoritos
+    )
 
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username

@@ -229,6 +229,8 @@ def fav_ad():
         abort(401, 'Nenhum usuário logado.')
     if not anuncio:
         abort(401, 'O anúncio não foi encontrado')
+    if anuncio in user.anuncios_favoritos:
+        abort(400, 'O anúncio já está nos favoritos do usuário.')
 
     user.anuncios_favoritos.append(anuncio)
     db.session.commit()
