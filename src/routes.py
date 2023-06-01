@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from .model import (
     User,
     db,
+    Anuncio,
     AnuncioLivro,
     AnuncioApartamento,
     TokenBlockList
@@ -202,6 +203,25 @@ def update_user():
     db.session.commit()
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
+
+
+@bp.route('delete-ad', methods=['DELETE'])
+@jwt_required()
+def delete_ad():
+    ad_id = request.json.get('id', None)
+
+    if not ad_id: abort(400, 'O campo de ID deve ser preenchido.')
+
+    ad = Anuncio.query.filter_by(id=ad_id).one_or_none()
+
+    if not ad: abort(400, 'Anúncio não existe.')
+    if not ad.is_from_user(current_user): abort(401, 'Anúncio deletável apenas por autor.')
+
+    db.session.delete(ad)
+    db.session.commit()
+
+    return jsonify(message='Anúncio deletado.')
+
 
 @bp.route('/logout', methods=['DELETE'])
 @jwt_required()
