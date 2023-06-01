@@ -111,10 +111,11 @@ def create_ad():
         titulo_livro = request.json.get('tituloLivro', None)
         autor = request.json.get('autor', None)
         genero = request.json.get('genero', None)
+        aceita_trocas = request.json.get('aceitaTroca', False)
 
-        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, titulo_livro, genero, aceita_trocas]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero) 
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas) 
         
         db.session.add(new_livro)
         db.session.commit()   
