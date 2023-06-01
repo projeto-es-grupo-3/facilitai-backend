@@ -215,18 +215,19 @@ def logout():
     db.session.commit()
     return jsonify(msg="JWT revogado.")
 
-@bp.route("/notify", methods=['POST'])
 @jwt_required
 def notify():
     """
-    Notifica o usuário sobre atualizações em anúncios
+    Notifica o usuário sobre atualizações em anúncios.
+    Esse método é chamado dentro de outros métodos, quando houverem atualizações em 
+    anúncios do interesse do usuário.
     """
 
     user = current_user
 
     to_email = current_user.email
     subject = 'Houveram atualizações desde a sua última visita ao Facilitaí !'
-    message = '[TODO]'
+    message = 'Olá ! Anúncios de seu interesse foram atualizados desde a sua última visita.'    
 
     if send_email_notification(to_email, subject, message):
         return 'Notification sent successfully'
