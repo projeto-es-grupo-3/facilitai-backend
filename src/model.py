@@ -66,7 +66,7 @@ class Anuncio(db.Model):
         'polymorphic_identity': 'anuncio'
     }
 
-    def __init__(self, titulo, anunciante, descricao, preco, status):
+    def __init__(self, titulo, anunciante, descricao, preco, status=StatusAnuncio.AGUARDANDO_ACAO):
         self.titulo = titulo
         self.anunciante = anunciante
         self.descricao = descricao
@@ -84,15 +84,18 @@ class AnuncioLivro(Anuncio, db.Model):
 
     genero = db.Column(db.String(20), unique=False, nullable=True)
 
+    aceita_trocas = db.Column(db.Boolean, default=False, nullable=False)
+
     __mapper_args__ = {
         'polymorphic_identity':'anuncio_livro',
     }
 
-    def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero):
+    def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas=False):
         super().__init__(titulo, anunciante, descricao, preco, status)
         self.titulo_livro = titulo_livro
         self.autor = autor
         self.genero = genero
+        self.aceita_trocas = aceita_trocas
 
 
 class AnuncioApartamento(Anuncio, db.Model):
