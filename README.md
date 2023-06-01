@@ -86,6 +86,27 @@ As seguintes rotas estão implementadas:
     "curso": "EE"
 }
 ```
+### Filtro de livros
+`GET /search_books Authorization: Bearer {access_token}` filtra os livros de acordo com as escolhas do usuario, no seguinte formato:
+```json
+{
+  "nome_livro": "As cronicas wenzin",
+  "nome_autor": "wenzin",
+  "genero": "aventura",
+  "preco_min": 50,
+  "preco_max": 200
+}
+```
+## Filtro de apartamentos
+`GET /search_apartaments Authorization: Bearer {access_token}` filtra os apartamentos de acordo com as escolhas do usuario, no seguinte formato:
+```json
+{
+    "endereco": "r do wezin, n0",
+    "valor_min": 200,
+    "valor_max": 600,
+    "num_comodos": 3
+}
+```
 ### Logout
 
 `DELETE /logout Authorization: Bearer {access_token}` revoga o token de autenticação do usuário.
