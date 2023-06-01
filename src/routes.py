@@ -150,8 +150,8 @@ def edit_ad(id_anuncio):
     """
     anuncio = Anuncio.query.get(id_anuncio)
 
-    if not anuncio: abort(404, 'Anúncio não encontrado.')
-    if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio.')
+    if not anuncio: abort(404, 'Anúncio não encontrado')
+    if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio')
 
     categoria = request.json.get("categoria", None)
     titulo = request.json.get("titulo", None)
@@ -170,9 +170,6 @@ def edit_ad(id_anuncio):
         genero = request.json.get('genero', None)
         aceita_trocas = request.json.get('aceita_troca', None)
 
-        if titulo is None and autor is None and genero is None and aceita_trocas is None:
-            abort(400, 'Nenhum campo de edição fornecido para editar o anúncio.')
-
         anuncio.titulo = titulo
         anuncio.autor = autor
         anuncio.genero = genero
@@ -183,16 +180,13 @@ def edit_ad(id_anuncio):
         area = request.json.get('area', None)
         comodos = request.json.get('comodos', None)
 
-        if endereco is None and area is None and comodos is None:
-            abort(400, 'Nenhum campo de edição fornecido para editar o anúncio')
-
         anuncio.endereco = endereco
         anuncio.area = area
         anuncio.comodos = comodos
 
     db.session.commit()
 
-    return jsonify(message="Anúncio editado com sucesso."), 200
+    return jsonify(message="Anúncio editado com sucesso"), 200
 
 
 @bp.route("/login", methods=["POST"])
