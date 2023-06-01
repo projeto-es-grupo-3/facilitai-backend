@@ -128,6 +128,9 @@ def create_ad():
         
         db.session.add(new_apartament)
         db.session.commit()
+    
+    else: 
+        abort(400, 'Não existem anuncios dessa categoria')
 
     return jsonify(message='Anúncio criado.'), 201
 
@@ -153,11 +156,11 @@ def edit_ad(id_anuncio):
     if not anuncio: abort(404, 'Anúncio não encontrado')
     if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio')
 
-    categoria = request.json.get("categoria", None)
-    titulo = request.json.get("titulo", None)
-    descricao = request.json.get("descricao", None)
-    preco = float(request.json.get("preco", None))
-    status = request.json.get("status", None)
+    categoria = request.json.get("categoria")
+    titulo = request.json.get("titulo")
+    descricao = request.json.get("descricao")
+    preco = float(request.json.get("preco"))
+    status = request.json.get("status")
 
     anuncio.titulo = titulo
     anuncio.descricao = descricao
@@ -165,10 +168,10 @@ def edit_ad(id_anuncio):
     anuncio.status = StatusAnuncio(status)
 
     if categoria == 'livro':
-        titulo = request.json.get('titulo', None)
-        autor = request.json.get('autor', None)
-        genero = request.json.get('genero', None)
-        aceita_trocas = request.json.get('aceita_troca', None)
+        titulo_livro = request.json.get('titulo')
+        autor = request.json.get('autor')
+        genero = request.json.get('genero')
+        aceita_trocas = request.json.get('aceita_troca')
 
         anuncio.titulo = titulo
         anuncio.autor = autor
@@ -176,13 +179,16 @@ def edit_ad(id_anuncio):
         anuncio.aceita_troca = aceita_trocas
 
     elif categoria == 'apartamento':
-        endereco = request.json.get('endereco', None)
-        area = request.json.get('area', None)
-        comodos = request.json.get('comodos', None)
+        endereco = request.json.get('endereco')
+        area = request.json.get('area')
+        comodos = request.json.get('comodos')
 
         anuncio.endereco = endereco
         anuncio.area = area
         anuncio.comodos = comodos
+        
+    else: 
+        abort(400, 'Não existem anuncios dessa categoria')
 
     db.session.commit()
 
@@ -260,6 +266,7 @@ def update_user():
     db.session.commit()
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
+
 
 @bp.route('/logout', methods=['DELETE'])
 @jwt_required()
