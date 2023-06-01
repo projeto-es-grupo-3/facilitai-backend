@@ -168,15 +168,15 @@ def edit_ad(id_anuncio):
     anuncio.status = StatusAnuncio(status)
 
     if categoria == 'livro':
-        titulo_livro = request.json.get('titulo')
+        titulo_livro = request.json.get('titulo_livro')
         autor = request.json.get('autor')
         genero = request.json.get('genero')
-        aceita_trocas = request.json.get('aceita_troca')
+        aceita_trocas = request.json.get('aceita_trocas')
 
-        anuncio.titulo = titulo
+        anuncio.titulo_livro = titulo_livro
         anuncio.autor = autor
         anuncio.genero = genero
-        anuncio.aceita_troca = aceita_trocas
+        anuncio.aceita_trocas = aceita_trocas
 
     elif categoria == 'apartamento':
         endereco = request.json.get('endereco')
@@ -186,7 +186,7 @@ def edit_ad(id_anuncio):
         anuncio.endereco = endereco
         anuncio.area = area
         anuncio.comodos = comodos
-        
+
     else: 
         abort(400, 'Não existem anuncios dessa categoria')
 
