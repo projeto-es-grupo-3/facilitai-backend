@@ -30,7 +30,7 @@ def setup_app(app):
     init_jwt(app)
 
     # database uri
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost:5432/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
 
     # jwt configuration
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
