@@ -1,5 +1,9 @@
+import uuid
+
+from pathlib import Path
 from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
 
@@ -14,7 +18,6 @@ from .model import (
     StatusAnuncio,
     TokenBlockList
 )
-
 from .config import (
     REGISTER,
     LOGIN,
@@ -22,7 +25,10 @@ from .config import (
     CREATE_AD,
     UPDATE,
     DELETE_AD,
-    EDIT_AD
+    EDIT_AD,
+    UPLOAD_IMG_AD,
+    UPLOAD_PROFILE_IMG,
+    IMAGE_PATH
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -312,3 +318,21 @@ def logout():
     db.session.add(TokenBlockList(jti, now))
     db.session.commit()
     return jsonify(msg="JWT revogado.")
+
+
+@bp.route(UPLOAD_IMG_AD, methods=['POST'])
+@jwt_required()
+def upload_image_ad():
+    ad_id = request.form.get('ad_id')
+    img = request.files['ad_img']
+    img_filename = secure_filename(img.filename)
+    real_filename = str(uuid.uuid1()) + '_' + img_filename
+
+    image_path = Path(IMAGE_PATH + real_filename).expanduser()
+
+    img.save(image_path)
+
+    ad = Anuncio.query.get(ad_id)
+    ad.ad_img = real_filename
+
+    return jsonify(message='Image uploaded.'), 200
