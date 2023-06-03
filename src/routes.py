@@ -5,14 +5,25 @@ from datetime import datetime, timezone
 from dataclasses import asdict
 import json
 
+
 from .model import (
     User,
     db,
+    Anuncio,
     AnuncioLivro,
     AnuncioApartamento,
     Anuncio,
     StatusAnuncio,
     TokenBlockList
+)
+
+from .config import (
+    REGISTER,
+    LOGIN,
+    LOGOUT,
+    CREATE_AD,
+    UPDATE,
+    DELETE_AD
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -39,7 +50,7 @@ def init_jwt(app):
         return token is not None
 
 
-@bp.route('/register', methods=['POST'])
+@bp.route(REGISTER, methods=['POST'])
 def register():
 
     """Cria um novo usuário no sistema.
@@ -86,7 +97,7 @@ def register():
     return jsonify(message='Usuário cadastrado com sucesso.'), 201
 
 
-@bp.route('/create_ad', methods=['POST'])
+@bp.route(CREATE_AD, methods=['POST'])
 @jwt_required()
 def create_ad():
     """Cria um novo anúncio no sistema.
@@ -104,6 +115,7 @@ def create_ad():
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user
+    status = StatusAnuncio.AGUARDANDO_ACAO
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -112,10 +124,11 @@ def create_ad():
         titulo_livro = request.json.get('tituloLivro', None)
         autor = request.json.get('autor', None)
         genero = request.json.get('genero', None)
+        aceita_trocas = request.json.get('aceitaTroca', False)
 
-        if not all([titulo, descricao, preco, titulo_livro, genero]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, titulo_livro, genero, aceita_trocas]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, titulo_livro, autor, genero) 
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, bool(aceita_trocas)) 
         
         db.session.add(new_livro)
         db.session.commit()   
@@ -127,15 +140,78 @@ def create_ad():
 
         if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, endereco, area, comodos)
+        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, status, endereco, area, comodos)
         
         db.session.add(new_apartament)
         db.session.commit()
+    
+    else: 
+        abort(400, 'Não existem anuncios dessa categoria')
 
     return jsonify(message='Anúncio criado.'), 201
 
 
-@bp.route("/login", methods=["POST"])
+@bp.route('/edit_ad', methods=['PUT'])
+@jwt_required()
+def edit_ad():
+    """
+    Edita um anúncio existente.
+
+    Args:
+        id: O ID do anúncio a ser editado.
+
+    Returns:
+        Um objeto JSON com a mensagem de sucesso e código 200.
+
+    Raises:
+        NotFound: Se o anúncio não for encontrado.
+        Unauthorized: Se o usuário não estiver autorizado a editar o anúncio.
+    """
+    anuncio = Anuncio.query.get(request.json.get('id_anuncio'))
+
+    if not anuncio: abort(404, 'Anúncio não encontrado')
+    if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio')
+
+    categoria = request.json.get("categoria", None)
+    titulo = request.json.get("titulo", None)
+    descricao = request.json.get("descricao", None)
+    preco = request.json.get("preco", None)
+    status = request.json.get("status", None)
+
+    if titulo: anuncio.titulo = titulo
+    if descricao: anuncio.descricao = descricao
+    if preco: anuncio.preco = float(preco)
+    if status: anuncio.status = StatusAnuncio(status)
+
+    if categoria == 'livro':
+        titulo_livro = request.json.get('titulo_livro', None)
+        autor = request.json.get('autor', None)
+        genero = request.json.get('genero', None)
+        aceita_trocas = request.json.get('aceita_trocas', None)
+
+        if titulo_livro: anuncio.titulo_livro = titulo_livro
+        if autor: anuncio.autor = autor
+        if genero: anuncio.genero = genero
+        if aceita_trocas: anuncio.aceita_trocas = aceita_trocas
+
+    elif categoria == 'apartamento':
+        endereco = request.json.get('endereco', None)
+        area = request.json.get('area', None)
+        comodos = request.json.get('comodos', None)
+
+        if endereco: anuncio.endereco = endereco
+        if area: anuncio.area = area
+        if comodos: anuncio.comodos = comodos
+
+    else: 
+        abort(400, 'Não existem anuncios dessa categoria')
+
+    db.session.commit()
+
+    return jsonify(message="Anúncio editado com sucesso"), 200
+
+  
+@bp.route(LOGIN, methods=["POST"])
 def login():
     """
     Endpoint que permite logar no sistema, caso o usuário esteja cadastrado.
@@ -156,7 +232,7 @@ def login():
     return jsonify("Invalid credentials"), 401
 
 
-@bp.route('/update', methods=['POST'])
+@bp.route(UPDATE, methods=['POST'])
 @jwt_required()
 def update_user():
     """
@@ -207,7 +283,26 @@ def update_user():
 
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
-@bp.route('/logout', methods=['DELETE'])
+
+@bp.route(DELETE_AD, methods=['DELETE'])
+@jwt_required()
+def delete_ad():
+    ad_id = request.json.get('id', None)
+
+    if not ad_id: abort(400, 'O campo de ID deve ser preenchido.')
+
+    ad = Anuncio.query.filter_by(id=ad_id).one_or_none()
+
+    if not ad: abort(400, 'Anúncio não existe.')
+    if not ad.is_from_user(current_user): abort(401, 'Anúncio deletável apenas por autor.')
+
+    db.session.delete(ad)
+    db.session.commit()
+
+    return jsonify(message='Anúncio deletado.')
+
+
+@bp.route(LOGOUT, methods=['DELETE'])
 @jwt_required()
 def logout():
     """
