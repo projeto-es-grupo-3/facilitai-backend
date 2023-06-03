@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
-from model import StatusAnuncio
 
 
 from .model import (
@@ -11,6 +10,7 @@ from .model import (
     AnuncioLivro,
     AnuncioApartamento,
     Anuncio,
+    StatusAnuncio,
     TokenBlockList
 )
 
@@ -116,7 +116,7 @@ def create_ad():
 
         if not all([titulo, descricao, preco, titulo_livro, genero, aceita_trocas]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas) 
+        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, bool(aceita_trocas)) 
         
         db.session.add(new_livro)
         db.session.commit()   
@@ -141,7 +141,7 @@ def create_ad():
 
 @bp.route('/edit_ad', methods=['PUT'])
 @jwt_required()
-def edit_ad(id_anuncio):
+def edit_ad():
     """
     Edita um anúncio existente.
 
@@ -155,41 +155,41 @@ def edit_ad(id_anuncio):
         NotFound: Se o anúncio não for encontrado.
         Unauthorized: Se o usuário não estiver autorizado a editar o anúncio.
     """
-    anuncio = Anuncio.query.get(id_anuncio)
+    anuncio = Anuncio.query.get(request.json.get('id_anuncio'))
 
     if not anuncio: abort(404, 'Anúncio não encontrado')
     if anuncio.anunciante != current_user: abort(401, 'Usuário não autorizado para editar este anúncio')
 
-    categoria = request.json.get("categoria")
-    titulo = request.json.get("titulo")
-    descricao = request.json.get("descricao")
-    preco = float(request.json.get("preco"))
-    status = request.json.get("status")
+    categoria = request.json.get("categoria", None)
+    titulo = request.json.get("titulo", None)
+    descricao = request.json.get("descricao", None)
+    preco = request.json.get("preco", None)
+    status = request.json.get("status", None)
 
-    anuncio.titulo = titulo
-    anuncio.descricao = descricao
-    anuncio.preco = preco
-    anuncio.status = StatusAnuncio(status)
+    if titulo: anuncio.titulo = titulo
+    if descricao: anuncio.descricao = descricao
+    if preco: anuncio.preco = float(preco)
+    if status: anuncio.status = StatusAnuncio(status)
 
     if categoria == 'livro':
-        titulo_livro = request.json.get('titulo_livro')
-        autor = request.json.get('autor')
-        genero = request.json.get('genero')
-        aceita_trocas = request.json.get('aceita_trocas')
+        titulo_livro = request.json.get('titulo_livro', None)
+        autor = request.json.get('autor', None)
+        genero = request.json.get('genero', None)
+        aceita_trocas = request.json.get('aceita_trocas', None)
 
-        anuncio.titulo_livro = titulo_livro
-        anuncio.autor = autor
-        anuncio.genero = genero
-        anuncio.aceita_trocas = aceita_trocas
+        if titulo_livro: anuncio.titulo_livro = titulo_livro
+        if autor: anuncio.autor = autor
+        if genero: anuncio.genero = genero
+        if aceita_trocas: anuncio.aceita_trocas = aceita_trocas
 
     elif categoria == 'apartamento':
-        endereco = request.json.get('endereco')
-        area = request.json.get('area')
-        comodos = request.json.get('comodos')
+        endereco = request.json.get('endereco', None)
+        area = request.json.get('area', None)
+        comodos = request.json.get('comodos', None)
 
-        anuncio.endereco = endereco
-        anuncio.area = area
-        anuncio.comodos = comodos
+        if endereco: anuncio.endereco = endereco
+        if area: anuncio.area = area
+        if comodos: anuncio.comodos = comodos
 
     else: 
         abort(400, 'Não existem anuncios dessa categoria')
