@@ -7,10 +7,15 @@ from datetime import timedelta
 from .model import db
 from .routes import bp, init_jwt
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     CORS(app)
+    
+    if test_config is None:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
+    else:
+        app.config.from_mapping(test_config)
 
     # app configurations
     setup_app(app)
@@ -28,9 +33,6 @@ def setup_app(app):
 
     # initialize JWTManager
     init_jwt(app)
-
-    # database uri
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///facilitai'
 
     # jwt configuration
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)

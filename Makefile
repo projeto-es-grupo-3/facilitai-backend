@@ -17,3 +17,6 @@ venv:
 
 run: venv
 	$(FLASK) --app src.main run
+
+test:
+	$(PYTEST) -vv
