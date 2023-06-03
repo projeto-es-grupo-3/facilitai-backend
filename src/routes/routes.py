@@ -8,7 +8,7 @@ from flask_jwt_extended import create_access_token, current_user, jwt_required, 
 from datetime import datetime, timezone
 
 
-from .model import (
+from models.model import (
     User,
     db,
     Anuncio,
@@ -18,7 +18,7 @@ from .model import (
     StatusAnuncio,
     TokenBlockList
 )
-from .config import (
+from conf.config import (
     REGISTER,
     LOGIN,
     LOGOUT,

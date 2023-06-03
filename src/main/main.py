@@ -4,9 +4,9 @@ from werkzeug.security import gen_salt
 
 from datetime import timedelta
 
-from .model import db
-from .routes import bp, init_jwt
-from .config import initial_config
+from models.model import db
+from routes.routes import bp, init_jwt
+from conf.config import initial_config
 
 def create_app(test_config=None):
     app = Flask(__name__)
