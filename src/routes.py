@@ -10,9 +10,9 @@ from .model import (
     db,
     AnuncioLivro,
     AnuncioApartamento,
-    TokenBlockList,
     Anuncio,
-    Favorites
+    StatusAnuncio,
+    TokenBlockList
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
