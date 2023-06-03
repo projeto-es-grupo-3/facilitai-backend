@@ -73,6 +73,11 @@ class Anuncio(db.Model):
         self.preco = preco
         self.status = status
 
+    def is_from_user(self, user):
+        if self.anunciante == user: return True
+
+        return False
+
 
 class AnuncioLivro(Anuncio, db.Model):
 
