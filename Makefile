@@ -14,6 +14,7 @@ venv:
 	@echo "Installing requirements..."
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
+	$(PIP) install -e .
 
 run:
 	$(FLASK) --app src.main run
