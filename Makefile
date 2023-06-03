@@ -15,7 +15,7 @@ venv:
 	$(PIP) install --upgrade pip
 	$(PIP) install -r requirements.txt
 
-run: venv
+run:
 	$(FLASK) --app src.main run
 
 test:
