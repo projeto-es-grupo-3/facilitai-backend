@@ -9,7 +9,7 @@ from config import (
 )
 
 
-def test_user_register_sucess(client, db_session):
+def test_user_register_success(client, db_session):
     headers = {'Content-Type': 'application/json'}
     body = {
         "username": "test-user-name",
@@ -20,8 +20,6 @@ def test_user_register_sucess(client, db_session):
         "curso": "CC"
     }
 
-    print(dir(User))
-
     response = client.post(REGISTER, headers=headers, json=body)
 
     assert response.status_code == 201
@@ -29,6 +27,3 @@ def test_user_register_sucess(client, db_session):
     user = db_session.query(User).first()
     assert user.email == body['email']
     assert user.username == body['username']
-
-    db_session.delete(user)
-    db_session.commit()

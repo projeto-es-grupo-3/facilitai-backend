@@ -9,8 +9,8 @@ from src.model import db
 
 
 @pytest.fixture
-def app():
-    app = create_app()
+def app(postgres):
+    app = create_app({"SQLALCHEMY_DATABASE_URI": postgres.get_connection_url()})
     yield app
 
 
