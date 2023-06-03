@@ -21,6 +21,8 @@ class User(db.Model):
 
     curso = db.Column(db.String, nullable=False)
 
+    rating = db.Column(db.Integer, nullable=False)
+
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
     def __init__(self, username, email, matricula, campus, pass_hash, curso):

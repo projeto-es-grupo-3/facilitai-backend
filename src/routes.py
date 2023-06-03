@@ -214,3 +214,18 @@ def logout():
     db.session.add(TokenBlockList(jti, now))
     db.session.commit()
     return jsonify(msg="JWT revogado.")
+
+def increase_rating():
+    """
+    Aumenta o rating do usuário para cada troca/venda
+    """
+    user = current_user # Esse usuário é realamente o usuário atual ?
+
+    rating = user.rating
+    rating += 1
+
+    db.commit()
+
+
+
+
