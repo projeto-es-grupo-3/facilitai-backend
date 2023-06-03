@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from enum import Enum
+
 
 db = SQLAlchemy()
 
@@ -44,7 +46,11 @@ class User(db.Model):
         self.pass_hash = pass_hash
         self.curso = curso
 
-
+class StatusAnuncio(Enum):
+    AGUARDANDO_ACAO = 'Aguardando Ação'
+    TROCADO = 'Trocado'
+    VENDIDO = 'Vendido'
+    DOADO = 'Doado'
 class Anuncio(db.Model):
     __tablename__ = 'anuncio'
 
