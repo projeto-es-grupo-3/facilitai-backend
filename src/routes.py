@@ -21,7 +21,8 @@ from .config import (
     LOGOUT,
     CREATE_AD,
     UPDATE,
-    DELETE_AD
+    DELETE_AD,
+    EDIT_AD
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -149,7 +150,7 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-@bp.route('/edit_ad', methods=['PUT'])
+@bp.route(EDIT_AD, methods=['PUT'])
 @jwt_required()
 def edit_ad():
     """
