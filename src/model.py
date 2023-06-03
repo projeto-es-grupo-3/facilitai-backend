@@ -90,7 +90,6 @@ class AnuncioLivro(Anuncio, db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
             'titulo': self.titulo,
             'anunciante': self.anunciante.to_dict(),
             'descricao': self.descricao,
@@ -122,7 +121,6 @@ class AnuncioApartamento(Anuncio, db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
             'titulo': self.titulo,
             'anunciante': self.anunciante.to_dict(),
             'descricao': self.descricao,
