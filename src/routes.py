@@ -335,4 +335,25 @@ def upload_image_ad():
     ad = Anuncio.query.get(ad_id)
     ad.ad_img = real_filename
 
+    db.session.commit()
+
+    return jsonify(message='Image uploaded.'), 200
+
+
+@bp.route(UPLOAD_PROFILE_IMG, methods=['POST'])
+@jwt_required()
+def upload_profile_picture():
+    img = request.files['profile_img']
+    img_filename = secure_filename(img.filename)
+    real_filename = str(uuid.uuid1()) + '_' + img_filename
+
+    image_path = Path(IMAGE_PATH + real_filename).expanduser()
+
+    img.save(image_path)
+
+    user = User.query.get(current_user.id)
+    user.profile_img = real_filename
+
+    db.session.commit()
+
     return jsonify(message='Image uploaded.'), 200
