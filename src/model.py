@@ -96,14 +96,17 @@ class AnuncioLivro(Anuncio, db.Model):
             'preco': self.preco,
             'titulo_livro': self.titulo_livro,
             'autor': self.autor,
-            'genero': self.genero
+            'genero': self.genero,
+            'status': self.status,
+            'aceita_trocas': self.aceita_trocas
         }
 
-    def __init__(self, titulo, anunciante, descricao, preco, titulo_livro, autor, genero):
-        super().__init__(titulo, anunciante, descricao, preco)
+    def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas=False):
+        super().__init__(titulo, anunciante, descricao, preco, status)
         self.titulo_livro = titulo_livro
         self.autor = autor
         self.genero = genero
+        self.aceita_trocas = aceita_trocas
 
 
 class AnuncioApartamento(Anuncio, db.Model):
@@ -127,11 +130,12 @@ class AnuncioApartamento(Anuncio, db.Model):
             'preco': self.preco,
             'endereco': self.endereco,
             'area': self.area,
-            'comodos': self.comodos
+            'comodos': self.comodos,
+            'status': self.status
         }
 
-    def __init__(self, titulo, anunciante, descricao, preco, endereco, area, comodos):
-        super().__init__(titulo, anunciante, descricao, preco)
+    def __init__(self, titulo, anunciante, descricao, preco, status, endereco, area, comodos):
+        super().__init__(titulo, anunciante, descricao, preco, status)
         self.endereco = endereco
         self.area = area
         self.comodos = comodos
