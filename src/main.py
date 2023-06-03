@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from .model import db
 from .routes import bp, init_jwt
+from .config import initial_config
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -37,6 +38,9 @@ def setup_app(app):
     # jwt configuration
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
     app.config['JWT_SECRET_KEY'] = gen_salt(48)
+
+    # path configurations
+    initial_config()
 
     # initialize database
     @app.before_first_request
