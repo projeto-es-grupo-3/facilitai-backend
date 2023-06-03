@@ -4,8 +4,8 @@ from werkzeug.security import gen_salt
 
 from datetime import timedelta
 
-from model import db
-from routes import bp, init_jwt
+from .model import db
+from .routes import bp, init_jwt
 
 def create_app():
     app = Flask(__name__)

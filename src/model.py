@@ -1,16 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 
-
 db = SQLAlchemy()
 
-favoritos = db.Table(
-    'favoritos',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('anuncio_id', db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
-)
 
 class User(db.Model):
-
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -22,7 +15,7 @@ class User(db.Model):
     pass_hash = db.Column(db.String, nullable=False)
 
     email = db.Column(db.String, unique=True, nullable=False)
-    
+
     campus = db.Column(db.String, nullable=False)
 
     curso = db.Column(db.String, nullable=False)
@@ -31,8 +24,17 @@ class User(db.Model):
 
     anuncios_favoritos = db.relationship(
         'Anuncio',
-        secondary=favoritos
+        secondary='favorites'
     )
+
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'matricula': self.matricula,
+            'email': self.email,
+            'campus': self.campus,
+            'curso': self.curso
+        }
 
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username
@@ -44,23 +46,22 @@ class User(db.Model):
 
 
 class Anuncio(db.Model):
-
     __tablename__ = 'anuncio'
 
     id = db.Column(db.Integer, primary_key=True)
-    
+
     titulo = db.Column(db.String(70), unique=False, nullable=False)
-    
+
     anunciante = db.relationship('User', back_populates='anuncios')
 
     descricao = db.Column(db.String(500), unique=False, nullable=False)
-    
+
     preco = db.Column(db.Float, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # coluna que serve como diferenciador de tipo na tabela para representar os tipos
-    type_discriminator :  db.Mapped[str]
+    type_discriminator: db.Mapped[str]
 
     __mapper_args__ = {
         'polymorphic_on': 'type_discriminator',
@@ -75,18 +76,29 @@ class Anuncio(db.Model):
 
 
 class AnuncioLivro(Anuncio, db.Model):
-
     id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
 
     titulo_livro = db.Column(db.String(20), unique=False, nullable=False)
-    
+
     autor = db.Column(db.String(20), unique=False, nullable=True)
 
     genero = db.Column(db.String(20), unique=False, nullable=True)
 
     __mapper_args__ = {
-        'polymorphic_identity':'anuncio_livro',
+        'polymorphic_identity': 'anuncio_livro',
     }
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.to_dict(),
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'titulo_livro': self.titulo_livro,
+            'autor': self.autor,
+            'genero': self.genero
+        }
 
     def __init__(self, titulo, anunciante, descricao, preco, titulo_livro, autor, genero):
         super().__init__(titulo, anunciante, descricao, preco)
@@ -96,18 +108,29 @@ class AnuncioLivro(Anuncio, db.Model):
 
 
 class AnuncioApartamento(Anuncio, db.Model):
-
     id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), primary_key=True)
-    
+
     endereco = db.Column(db.String(70), unique=True, nullable=False)
-    
+
     area = db.Column(db.Integer, nullable=True)
-    
+
     comodos = db.Column(db.Integer, nullable=True)
 
     __mapper_args__ = {
-        'polymorphic_identity':'anuncio_apartamento',
+        'polymorphic_identity': 'anuncio_apartamento',
     }
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.to_dict(),
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'endereco': self.endereco,
+            'area': self.area,
+            'comodos': self.comodos
+        }
 
     def __init__(self, titulo, anunciante, descricao, preco, endereco, area, comodos):
         super().__init__(titulo, anunciante, descricao, preco)
@@ -115,8 +138,8 @@ class AnuncioApartamento(Anuncio, db.Model):
         self.area = area
         self.comodos = comodos
 
-class TokenBlockList(db.Model):
 
+class TokenBlockList(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     jti = db.Column(db.String(36), nullable=False, index=True)
@@ -126,3 +149,17 @@ class TokenBlockList(db.Model):
     def __init__(self, jti, created_at):
         self.jti = jti
         self.created_at = created_at
+
+
+class Favorites(db.Model):
+    __tablename__ = 'favorites'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    anuncio_id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), nullable=False)
+
+    def __init__(self, user_id, anuncio_id):
+        self.user_id = user_id
+        self.anuncio_id = anuncio_id

@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
+from dataclasses import asdict
+import json
 
 from .model import (
     User,
@@ -9,7 +11,8 @@ from .model import (
     AnuncioLivro,
     AnuncioApartamento,
     TokenBlockList,
-    Anuncio
+    Anuncio,
+    Favorites
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -235,5 +238,20 @@ def fav_ad():
     user.anuncios_favoritos.append(anuncio)
     db.session.commit()
 
-    return jsonify(message='Anúncio favoritado com sucesso.'), 204
+    return jsonify(message='Anúncio favoritado com sucesso.'), 200
+
+@bp.route('/get_ad_favs', methods=['GET'])
+@jwt_required()
+def get_favorited_anuncios():
+    user = current_user
+    if not user:
+        abort(401, 'Nenhum usuário logado.')
+
+    anuncios_favoritados = user.anuncios_favoritos
+
+    anuncios_dict = [anuncio.to_dict() for anuncio in anuncios_favoritados]
+
+    anuncios_json = json.dumps(anuncios_dict)
+
+    return anuncios_json
 
