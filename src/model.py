@@ -24,6 +24,11 @@ class User(db.Model):
 
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
+    anuncios_favoritos = db.relationship(
+        'Anuncio',
+        secondary='favorites'
+    )
+
     def to_dict(self):
         return {
             'username': self.username,
@@ -168,3 +173,16 @@ class TokenBlockList(db.Model):
     def __init__(self, jti, created_at):
         self.jti = jti
         self.created_at = created_at
+
+class Favorites(db.Model):
+    __tablename__ = 'favorites'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    anuncio_id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), nullable=False)
+
+    def __init__(self, user_id, anuncio_id):
+        self.user_id = user_id
+        self.anuncio_id = anuncio_id

@@ -115,7 +115,7 @@ def create_ad():
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user
-    status = StatusAnuncio.AGUARDANDO_ACAO
+    status = StatusAnuncio.AGUARDANDO_ACAO.name
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
