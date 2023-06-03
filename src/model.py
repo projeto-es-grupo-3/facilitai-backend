@@ -54,7 +54,7 @@ class Anuncio(db.Model):
     
     preco = db.Column(db.Float, nullable=False)
 
-    status = db.Column(db.Enum(StatusAnuncio), default=StatusAnuncio.AGUARDANDO_ACAO, nullable=False)
+    status = db.Column(db.String(20), default=StatusAnuncio.AGUARDANDO_ACAO.name, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
