@@ -24,6 +24,8 @@ class User(db.Model):
 
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
+    profile_img = db.Column(db.String)
+
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username
         self.matricula = matricula
@@ -58,6 +60,8 @@ class Anuncio(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    ad_img = db.Column(db.String)
+
     # coluna que serve como diferenciador de tipo na tabela para representar os tipos
     type_discriminator :  db.Mapped[str]
 
@@ -71,7 +75,7 @@ class Anuncio(db.Model):
         self.anunciante = anunciante
         self.descricao = descricao
         self.preco = preco
-        self.status = status
+        self.status = status.name
 
     def is_from_user(self, user):
         if self.anunciante == user: return True
