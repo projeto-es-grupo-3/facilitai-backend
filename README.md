@@ -89,3 +89,27 @@ As seguintes rotas estão implementadas:
 ### Logout
 
 `DELETE /logout Authorization: Bearer {access_token}` revoga o token de autenticação do usuário.
+
+
+### Upload e acesso a imagens
+
+Existem dois endpoints para o upload de imagens: um para upload de imagens de anúncios (apenas uma imagem por anúncio) e uma para o upload da imagem de perfil. Ambos os endpoints retornam o header `Location` com a localização da imagem no servidor.
+
+- `POST /upload-image Authorization: Bearer {access_token}` recebe a imagem para o anúncio em `multipart/form-data`:
+```json
+# em multipart/form-data
+{
+    "ad_id": 1,
+    "ad_img": <imagem>
+}
+```
+
+- `POST /upload-profile Authorization: Bearer {access_token}` recebe a imagem para a foto de perfil em `multipart/form-data`:
+```json
+# em multipart/form-data
+{
+    "profile_img": <imagem>
+}
+```
+
+> Para acessar imagens um request com `GET <Location> Authorization: Bearer {access_token}` consegue acessar a imagem.
