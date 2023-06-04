@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
+from dataclasses import asdict
+import json
 
 
 from models.model import (
@@ -29,7 +31,9 @@ from conf.config import (
     UPLOAD_IMG_AD,
     UPLOAD_PROFILE_IMG,
     IMAGE_PATH,
-    IMAGE
+    IMAGE,
+    FAV_AD,
+    GET_FAV_ADS
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -121,7 +125,7 @@ def create_ad():
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user
-    status = StatusAnuncio.AGUARDANDO_ACAO
+    status = StatusAnuncio.AGUARDANDO_ACAO.name
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -319,6 +323,44 @@ def logout():
     db.session.add(TokenBlockList(jti, now))
     db.session.commit()
     return jsonify(msg="JWT revogado.")
+
+
+@bp.route(FAV_AD, methods=['POST'])
+@jwt_required()
+def fav_ad():
+    anuncio_id = request.json.get('anuncio_id')
+    anuncio = Anuncio.query.get(anuncio_id)
+    # Obtém o usuário atual a partir da sessão
+    user = current_user
+
+    # Verifica se o usuário está autenticado
+    if not user:
+        abort(401, 'Nenhum usuário logado.')
+    if not anuncio:
+        abort(401, 'O anúncio não foi encontrado')
+    if anuncio in user.anuncios_favoritos:
+        abort(400, 'O anúncio já está nos favoritos do usuário.')
+
+    user.anuncios_favoritos.append(anuncio)
+    db.session.commit()
+
+    return jsonify(message='Anúncio favoritado com sucesso.'), 200
+
+
+@bp.route(GET_FAV_ADS, methods=['GET'])
+@jwt_required()
+def get_favorited_anuncios():
+    user = current_user
+    if not user:
+        abort(401, 'Nenhum usuário logado.')
+
+    anuncios_favoritados = user.anuncios_favoritos
+
+    anuncios_dict = [anuncio.to_dict() for anuncio in anuncios_favoritados]
+
+    anuncios_json = json.dumps(anuncios_dict)
+
+    return anuncios_json
 
 
 @bp.route(UPLOAD_IMG_AD, methods=['POST'])

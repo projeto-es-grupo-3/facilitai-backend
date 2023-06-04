@@ -24,7 +24,18 @@ class User(db.Model):
 
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
+    anuncios_favoritos = db.relationship('Anuncio', secondary='favorites')
+
     profile_img = db.Column(db.String)
+
+    def to_dict(self):
+        return {
+            'username': self.username,
+            'matricula': self.matricula,
+            'email': self.email,
+            'campus': self.campus,
+            'curso': self.curso
+        }
 
     def __init__(self, username, email, matricula, campus, pass_hash, curso):
         self.username = username
@@ -99,6 +110,19 @@ class AnuncioLivro(Anuncio, db.Model):
         'polymorphic_identity':'anuncio_livro',
     }
 
+    def to_dict(self):
+        return {
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.to_dict(),
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'titulo_livro': self.titulo_livro,
+            'autor': self.autor,
+            'genero': self.genero,
+            'status': self.status,
+            'aceita_trocas': self.aceita_trocas
+        }
+
     def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas=False):
         super().__init__(titulo, anunciante, descricao, preco, status)
         self.titulo_livro = titulo_livro
@@ -121,11 +145,24 @@ class AnuncioApartamento(Anuncio, db.Model):
         'polymorphic_identity':'anuncio_apartamento',
     }
 
+    def to_dict(self):
+        return {
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.to_dict(),
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'endereco': self.endereco,
+            'area': self.area,
+            'comodos': self.comodos,
+            'status': self.status
+        }
+
     def __init__(self, titulo, anunciante, descricao, preco, status, endereco, area, comodos):
         super().__init__(titulo, anunciante, descricao, preco, status)
         self.endereco = endereco
         self.area = area
         self.comodos = comodos
+
 
 class TokenBlockList(db.Model):
 
@@ -138,3 +175,17 @@ class TokenBlockList(db.Model):
     def __init__(self, jti, created_at):
         self.jti = jti
         self.created_at = created_at
+
+
+class Favorites(db.Model):
+    __tablename__ = 'favorites'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    anuncio_id = db.Column(db.Integer, db.ForeignKey('anuncio.id'), nullable=False)
+
+    def __init__(self, user_id, anuncio_id):
+        self.user_id = user_id
+        self.anuncio_id = anuncio_id

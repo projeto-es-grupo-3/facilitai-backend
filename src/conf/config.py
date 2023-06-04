@@ -13,6 +13,8 @@ EDIT_AD = '/edit-ad'
 UPLOAD_IMG_AD = '/upload-image'
 UPLOAD_PROFILE_IMG= '/upload-profile'
 IMAGE = '/image/<file_name>'
+FAV_AD = '/fav_ad'
+GET_FAV_ADS = '/get_fav_ads'
 
 # image saving paths
 IMAGE_PATH = '~/.facilitai/images/'
