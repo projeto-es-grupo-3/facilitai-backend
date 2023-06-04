@@ -12,6 +12,7 @@ DELETE_AD = '/delete-ad'
 EDIT_AD = '/edit-ad'
 UPLOAD_IMG_AD = '/upload-image'
 UPLOAD_PROFILE_IMG= '/upload-profile'
+IMAGE = '/image/<file_name>'
 
 # image saving paths
 IMAGE_PATH = '~/.facilitai/images/'

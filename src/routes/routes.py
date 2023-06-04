@@ -1,7 +1,7 @@
 import uuid
 
 from pathlib import Path
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, request, jsonify, abort, url_for, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
@@ -28,7 +28,8 @@ from conf.config import (
     EDIT_AD,
     UPLOAD_IMG_AD,
     UPLOAD_PROFILE_IMG,
-    IMAGE_PATH
+    IMAGE_PATH,
+    IMAGE
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -337,7 +338,9 @@ def upload_image_ad():
 
     db.session.commit()
 
-    return jsonify(message='Image uploaded.'), 200
+    image_location = url_for('bp.get_image', file_name=real_filename, _external=True)
+
+    return jsonify(message='Image uploaded.'), 200, {'Location': image_location}
 
 
 @bp.route(UPLOAD_PROFILE_IMG, methods=['POST'])
@@ -356,4 +359,12 @@ def upload_profile_picture():
 
     db.session.commit()
 
-    return jsonify(message='Image uploaded.'), 200
+    image_location = url_for('bp.get_image', file_name=real_filename, _external=True)
+
+    return jsonify(message='Image uploaded.'), 200, {'Location': image_location}
+
+
+@bp.route(IMAGE, methods=['GET'])
+@jwt_required()
+def get_image(file_name):
+    return send_file(Path(IMAGE_PATH + file_name).expanduser(), mimetype='image/png')
