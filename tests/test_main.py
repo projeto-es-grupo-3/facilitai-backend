@@ -1,5 +1,5 @@
-from model import User
-from config import (
+from models.model import User
+from conf.config import (
     REGISTER,
     LOGIN,
     LOGOUT,

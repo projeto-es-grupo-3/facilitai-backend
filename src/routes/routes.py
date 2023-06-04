@@ -1,12 +1,16 @@
-from flask import Blueprint, request, jsonify, abort
+import uuid
+
+from pathlib import Path
+from flask import Blueprint, request, jsonify, abort, url_for, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_jwt_extended import create_access_token, current_user, jwt_required, JWTManager, get_jwt
 from datetime import datetime, timezone
 from dataclasses import asdict
 import json
 
 
-from .model import (
+from models.model import (
     User,
     db,
     Anuncio,
@@ -16,14 +20,20 @@ from .model import (
     StatusAnuncio,
     TokenBlockList
 )
-
-from .config import (
+from conf.config import (
     REGISTER,
     LOGIN,
     LOGOUT,
     CREATE_AD,
     UPDATE,
-    DELETE_AD
+    DELETE_AD,
+    EDIT_AD,
+    UPLOAD_IMG_AD,
+    UPLOAD_PROFILE_IMG,
+    IMAGE_PATH,
+    IMAGE,
+    FAV_AD,
+    GET_FAV_ADS
 )
 
 bp = Blueprint('bp', __name__, template_folder='templates', url_prefix='')
@@ -151,7 +161,7 @@ def create_ad():
     return jsonify(message='Anúncio criado.'), 201
 
 
-@bp.route('/edit_ad', methods=['PUT'])
+@bp.route(EDIT_AD, methods=['PUT'])
 @jwt_required()
 def edit_ad():
     """
@@ -314,7 +324,8 @@ def logout():
     db.session.commit()
     return jsonify(msg="JWT revogado.")
 
-@bp.route('/fav_ad', methods=['POST'])
+
+@bp.route(FAV_AD, methods=['POST'])
 @jwt_required()
 def fav_ad():
     anuncio_id = request.json.get('anuncio_id')
@@ -335,7 +346,8 @@ def fav_ad():
 
     return jsonify(message='Anúncio favoritado com sucesso.'), 200
 
-@bp.route('/get_ad_favs', methods=['GET'])
+
+@bp.route(GET_FAV_ADS, methods=['GET'])
 @jwt_required()
 def get_favorited_anuncios():
     user = current_user
@@ -350,3 +362,51 @@ def get_favorited_anuncios():
 
     return anuncios_json
 
+
+@bp.route(UPLOAD_IMG_AD, methods=['POST'])
+@jwt_required()
+def upload_image_ad():
+    ad_id = request.form.get('ad_id')
+    img = request.files['ad_img']
+    img_filename = secure_filename(img.filename)
+    real_filename = str(uuid.uuid1()) + '_' + img_filename
+
+    image_path = Path(IMAGE_PATH + real_filename).expanduser()
+
+    img.save(image_path)
+
+    ad = Anuncio.query.get(ad_id)
+    ad.ad_img = real_filename
+
+    db.session.commit()
+
+    image_location = url_for('bp.get_image', file_name=real_filename, _external=True)
+
+    return jsonify(message='Image uploaded.'), 200, {'Location': image_location}
+
+
+@bp.route(UPLOAD_PROFILE_IMG, methods=['POST'])
+@jwt_required()
+def upload_profile_picture():
+    img = request.files['profile_img']
+    img_filename = secure_filename(img.filename)
+    real_filename = str(uuid.uuid1()) + '_' + img_filename
+
+    image_path = Path(IMAGE_PATH + real_filename).expanduser()
+
+    img.save(image_path)
+
+    user = User.query.get(current_user.id)
+    user.profile_img = real_filename
+
+    db.session.commit()
+
+    image_location = url_for('bp.get_image', file_name=real_filename, _external=True)
+
+    return jsonify(message='Image uploaded.'), 200, {'Location': image_location}
+
+
+@bp.route(IMAGE, methods=['GET'])
+@jwt_required()
+def get_image(file_name):
+    return send_file(Path(IMAGE_PATH + file_name).expanduser(), mimetype='image/png')

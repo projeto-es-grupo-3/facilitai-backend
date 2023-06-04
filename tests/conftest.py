@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from testcontainers.postgres import PostgresContainer
 
-from src.main import create_app
-from src.model import db
+from main.main import create_app
+from models.model import db
 
 
 @pytest.fixture
