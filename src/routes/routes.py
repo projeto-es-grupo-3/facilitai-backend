@@ -325,7 +325,7 @@ def search_books():
         query = query.filter(AnuncioLivro.preco <= float(preco_max))
 
     if aceita_trocas:
-        query = query.filter(AnuncioLivro.aceita_trocas == True)
+        query = query.filter(AnuncioLivro.aceita_trocas == aceita_trocas)
 
     # Executar a consulta e recuperar os anúncios de livros filtrados
     resultados = query.all()
@@ -343,6 +343,7 @@ def search_books():
             'titulo_livro': resultado.titulo_livro,
             'autor': resultado.autor,
             'genero': resultado.genero,
+            'aceita_trocas': resultado.aceita_trocas
         }
         resultados_serializados.append(resultado_serializado)
 
