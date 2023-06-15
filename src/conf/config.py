@@ -15,8 +15,8 @@ UPLOAD_PROFILE_IMG= '/upload-profile'
 IMAGE = '/image/<file_name>'
 SEARCH_BOOKS = '/search-books'
 SEARCH_APARTMENTS = '/search-apartments'
-FAV_AD = '/fav_ad'
-GET_FAV_ADS = '/get_fav_ads'
+FAV_AD = '/fav-ad'
+GET_FAV_ADS = '/get-fav-ads'
 
 # image saving paths
 IMAGE_PATH = '~/.facilitai/images/'
