@@ -125,7 +125,7 @@ def create_ad():
     categoria = request.json.get("categoria", None)
     # imagens = request.files.getlist('imagens')
     anunciante = current_user
-    status = StatusAnuncio.AGUARDANDO_ACAO.name
+    status = StatusAnuncio.AGUARDANDO_ACAO
 
     if not categoria: abort(400, 'Categoria é necessária.')
     if not anunciante: abort(401, 'O usuário precisa estar logado.')
@@ -136,7 +136,7 @@ def create_ad():
         genero = request.json.get('genero', None)
         aceita_trocas = request.json.get('aceitaTroca', False)
 
-        if not all([titulo, descricao, preco, titulo_livro, genero, aceita_trocas]): abort(400, 'Todos os campos precisam ser preenchidos.')
+        if not all([titulo, descricao, preco, titulo_livro, genero, autor]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
         new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, bool(aceita_trocas)) 
         
@@ -295,63 +295,51 @@ def update_user():
 
 
 @bp.route(SEARCH_BOOKS, methods=['GET'])
-@jwt_required()
 def search_books():
-    # Obter os parâmetros de consulta da requisição
-    nome_livro = request.json.get('nome_livro')
-    nome_autor = request.json.get('nome_autor')
-    genero = request.json.get('genero')
-    preco_min = request.json.get('preco_min')
-    preco_max = request.json.get('preco_max')
-    aceita_trocas = request.json.get('aceita_trocas')
 
     # Iniciar com uma consulta base para recuperar os anúncios de livros
     query = AnuncioLivro.query
+    filters = request.json
 
-    # Aplicar filtros com base nos critérios do usuário
-    if nome_livro:
-        query = query.filter(AnuncioLivro.titulo_livro.ilike(f'%{nome_livro}%'))
+    # Obter os parâmetros de consulta da requisição
+    if filters:
+        nome_livro = filters.get('nome_livro', None)
+        nome_autor = filters.get('nome_autor', None)
+        genero = filters.get('genero', None)
+        preco_min = filters.get('preco_min, None')
+        preco_max = filters.get('preco_max', None)
+        aceita_trocas = filters.get('aceita_trocas', None)
 
-    if nome_autor:
-        query = query.filter(AnuncioLivro.autor.ilike(f'%{nome_autor}%'))
 
-    if genero:
-        query = query.filter(AnuncioLivro.genero.ilike(f'%{genero}%'))
+        # Aplicar filtros com base nos critérios do usuário
+        if nome_livro:
+            query = query.filter(AnuncioLivro.titulo_livro.ilike(f'%{nome_livro}%'))
 
-    if preco_min:
-        query = query.filter(AnuncioLivro.preco >= float(preco_min))
+        if nome_autor:
+            query = query.filter(AnuncioLivro.autor.ilike(f'%{nome_autor}%'))
 
-    if preco_max:
-        query = query.filter(AnuncioLivro.preco <= float(preco_max))
+        if genero:
+            query = query.filter(AnuncioLivro.genero.ilike(f'%{genero}%'))
 
-    if aceita_trocas:
-        query = query.filter(AnuncioLivro.aceita_trocas == aceita_trocas)
+        if preco_min:
+            query = query.filter(AnuncioLivro.preco >= float(preco_min))
+
+        if preco_max:
+            query = query.filter(AnuncioLivro.preco <= float(preco_max))
+
+        if aceita_trocas:
+            query = query.filter(AnuncioLivro.aceita_trocas == aceita_trocas)
 
     # Executar a consulta e recuperar os anúncios de livros filtrados
     resultados = query.all()
 
-    # Criar uma lista para armazenar os resultados serializados
-    resultados_serializados = []
+    # Serializar cada anúncio de livro nos resultados e remover dados de anunciante
+    livros_serial = [livro.get_to_dict() for livro in resultados]
 
-    # Serializar cada anúncio de livro nos resultados
-    for resultado in resultados:
-        resultado_serializado = {
-            'id': resultado.id,
-            'titulo': resultado.titulo,
-            'descricao': resultado.descricao,
-            'preco': resultado.preco,
-            'titulo_livro': resultado.titulo_livro,
-            'autor': resultado.autor,
-            'genero': resultado.genero,
-            'aceita_trocas': resultado.aceita_trocas
-        }
-        resultados_serializados.append(resultado_serializado)
-
-    return jsonify(livros=resultados_serializados)
+    return jsonify(livros_serial)
 
 
 @bp.route(SEARCH_APARTMENTS, methods=['GET'])
-@jwt_required()
 def search_apartments():
     """Realiza a filtragem de imóveis anunciados com base nos filtros fornecidos no JSON.
 
@@ -365,37 +353,31 @@ def search_apartments():
         Uma lista de imóveis filtrados em formato JSON.
     """
     filters = request.json
-    endereco = filters['endereco']
-    valor_min = filters['valor_min']
-    valor_max = filters['valor_max']
-    num_comodos = filters['num_comodos']
-
     query = AnuncioApartamento.query
 
-    if endereco:
-        query = query.filter(AnuncioApartamento.endereco.ilike(f'%{endereco}%'))
+    if filters:
+        endereco = filters.get('endereco', None)
+        valor_min = filters.get('valor_min', None)
+        valor_max = filters.get('valor_max', None)
+        num_comodos = filters.get('num_comodos', None)
 
-    if valor_min:
-        query = query.filter(AnuncioApartamento.preco >= float(valor_min))
+        if endereco:
+            query = query.filter(AnuncioApartamento.endereco.ilike(f'%{endereco}%'))
 
-    if valor_max:
-        query = query.filter(AnuncioApartamento.preco <= float(valor_max))
+        if valor_min:
+            query = query.filter(AnuncioApartamento.preco >= float(valor_min))
 
-    if num_comodos:
-        query = query.filter(AnuncioApartamento.comodos >= int(num_comodos))
+        if valor_max:
+            query = query.filter(AnuncioApartamento.preco <= float(valor_max))
+
+        if num_comodos:
+            query = query.filter(AnuncioApartamento.comodos >= int(num_comodos))
 
     lista_apartamentos = query.all()
 
-    apartamentos_json = []
-    for apartamento in lista_apartamentos:
-        apartamentos_json.append({
-            'id': apartamento.id,
-            'endereco': apartamento.endereco,
-            'preco': apartamento.preco,
-            'comodos': apartamento.comodos
-        })
+    apartamentos_json = [apartamento.get_to_dict() for apartamento in lista_apartamentos]
 
-    return jsonify(apartamentos=apartamentos_json)
+    return jsonify(apartamentos_json)
 
 
 @bp.route(DELETE_AD, methods=['DELETE'])
@@ -460,11 +442,9 @@ def get_favorited_anuncios():
 
     anuncios_favoritados = user.anuncios_favoritos
 
-    anuncios_dict = [anuncio.to_dict() for anuncio in anuncios_favoritados]
+    favoritos = [anuncio.get_to_dict() for anuncio in anuncios_favoritados]
 
-    anuncios_json = json.dumps(anuncios_dict)
-
-    return anuncios_json
+    return jsonify(favoritos)
 
 
 @bp.route(UPLOAD_IMG_AD, methods=['POST'])
