@@ -1,3 +1,5 @@
+import os
+
 from flask_cors import CORS
 from flask import Flask 
 from werkzeug.security import gen_salt
@@ -13,8 +15,8 @@ def create_app(test_config=None):
 
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = 'facilitai-ufcg@gmail.com'
-    app.config['MAIL_PASSWORD'] = 'odeiojava123'
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True
 
