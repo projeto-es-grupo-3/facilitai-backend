@@ -22,7 +22,7 @@ class User(db.Model):
 
     curso = db.Column(db.String, nullable=False)
 
-    rating = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Integer, nullable=True)
 
     anuncios = db.relationship('Anuncio', back_populates='anunciante')
 
@@ -125,6 +125,19 @@ class AnuncioLivro(Anuncio, db.Model):
             'aceita_trocas': self.aceita_trocas
         }
 
+    def get_to_dict(self):
+        return {
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.username,
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'titulo_livro': self.titulo_livro,
+            'autor': self.autor,
+            'genero': self.genero,
+            'status': self.status,
+            'aceita_trocas': self.aceita_trocas
+        }
+
     def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas=False):
         super().__init__(titulo, anunciante, descricao, preco, status)
         self.titulo_livro = titulo_livro
@@ -151,6 +164,18 @@ class AnuncioApartamento(Anuncio, db.Model):
         return {
             'titulo': self.titulo,
             'anunciante': self.anunciante.to_dict(),
+            'descricao': self.descricao,
+            'preco': self.preco,
+            'endereco': self.endereco,
+            'area': self.area,
+            'comodos': self.comodos,
+            'status': self.status
+        }
+
+    def get_to_dict(self):
+        return {
+            'titulo': self.titulo,
+            'anunciante': self.anunciante.username,
             'descricao': self.descricao,
             'preco': self.preco,
             'endereco': self.endereco,
