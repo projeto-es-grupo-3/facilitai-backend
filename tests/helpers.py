@@ -7,7 +7,7 @@ class Helpers:
     @staticmethod
     def create_user(db_session, faker):
         password = '12345678'
-        password_hash = generate_password_hash(password, method="sha256")
+        password_hash = generate_password_hash(password)
         email = faker.email()
 
         new_user = User(
