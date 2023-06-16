@@ -25,3 +25,9 @@ faker = "^18.10.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+omit = [
+    "*/__init__.py",
+    "src/setup.py"
+]
