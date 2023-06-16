@@ -9,11 +9,14 @@ Para rodar o serviço localmente, as seguintes dependências são necessárias:
 Com as dependências resolvidas e dentro do diretório do projeto:
 
 ```sh
-# cria o ambiente virtual no sub-diretório .venv
+# instala o gerenciador de projeto na máquina
+make setup-poetry
+
+# cria o ambiente virtual com poetry
 make venv
 
 # ativa o ambiente virtual
-. .venv/bin/activate
+poetry shell
 
 # roda o serviço
 make run
