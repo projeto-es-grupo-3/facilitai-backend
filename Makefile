@@ -15,3 +15,6 @@ run:
 
 test:
 	poetry run pytest
+
+coverage:
+	poetry run pytest --cov=src tests/test_main.py
