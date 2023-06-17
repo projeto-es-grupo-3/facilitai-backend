@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 
-from models.model import User, AnuncioLivro, AnuncioApartamento
+from models.model import User, AnuncioLivro, AnuncioApartamento, StatusAnuncio
 
 
 class Helpers:
@@ -29,7 +29,7 @@ class Helpers:
     def create_book_ad(db_session, constructor):
         anuncio = AnuncioLivro(constructor['titulo'], constructor['anunciante'], 
                                constructor['descricao'], constructor['preco'], 
-                               constructor['status'], constructor['titulo_livro'], 
+                               StatusAnuncio.AGUARDANDO_ACAO, constructor['titulo_livro'], 
                                constructor['autor'], constructor['genero'], 
                                constructor['aceita_trocas']) 
 
@@ -42,7 +42,7 @@ class Helpers:
     def create_ap_ad(db_session, constructor):
         anuncio = AnuncioApartamento(constructor['titulo'], constructor['anunciante'], 
                                      constructor['descricao'], constructor['preco'], 
-                                     constructor['status'], constructor['endereco'], 
+                                     StatusAnuncio.AGUARDANDO_ACAO, constructor['endereco'], 
                                      constructor['area'], constructor['comodos'])
 
         db_session.add(anuncio)

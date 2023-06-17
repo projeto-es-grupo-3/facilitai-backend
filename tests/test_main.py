@@ -1,5 +1,5 @@
-from src.models.model import User, AnuncioLivro, AnuncioApartamento, StatusAnuncio
-from src.conf.config import (
+from models.model import User, AnuncioLivro, AnuncioApartamento, StatusAnuncio
+from conf.config import (
     REGISTER,
     LOGIN,
     LOGOUT,
@@ -202,16 +202,30 @@ def test_search_books_with_filters(client, db_session, json_headers, faker, help
     # Cria alguns anúncios de livros de teste no banco de dados
     user, password = helpers.create_user(db_session, faker)
 
-    livro1 = AnuncioLivro(titulo='Livro 1', anunciante=user.username, descricao='Descrição 1',
-                          preco=10.0, status=StatusAnuncio.AGUARDANDO_ACAO,
-                          titulo_livro='Livro A', autor='Autor X', genero='Ficção', aceita_trocas=True)
+    livro1 = {
+        'titulo': 'Livro 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 10.0,
+        'titulo_livro': 'Livro A',
+        'autor': 'Autor X',
+        'genero': 'Ficção',
+        'aceita_trocas': True
+    }
 
-    livro2 = AnuncioLivro(titulo='Livro 2', anunciante=user.username, descricao='Descrição 2',
-                          preco=20.0, status=StatusAnuncio.AGUARDANDO_ACAO,
-                          titulo_livro='Livro B', autor='Autor Y', genero='Não Ficção', aceita_trocas=False)
+    livro2 = {
+        'titulo': 'Livro 2',
+        'anunciante': user,
+        'descricao': 'Descrição 2',
+        'preco': 20.0,
+        'titulo_livro': 'Livro B',
+        'autor': 'Autor Y',
+        'genero': 'Não-Ficção',
+        'aceita_trocas': False
+    }
 
-    db_session.add_all([livro1, livro2])
-    db_session.commit()
+    helpers.create_book_ad(db_session, livro1)
+    helpers.create_book_ad(db_session, livro2)
 
     # Filtros para a pesquisa de livros
     filters = {
@@ -228,12 +242,9 @@ def test_search_books_with_filters(client, db_session, json_headers, faker, help
     assert len(data) == 1
 
     livro = data[0]
-    assert livro['titulo'] == 'Livro 1'
-    assert livro['preco'] == 10.0
-    assert livro['titulo_livro'] == 'Livro A'
-    assert livro['autor'] == 'Autor X'
-    assert livro['genero'] == 'Ficção'
-    assert livro['aceita_trocas'] is True
+    # deleta items intrinsecamente diferentes do dicionario
+    del livro['status'], livro['anunciante'], livro1['anunciante']
+    assert livro == livro1
 
 
 def test_search_books_without_filters(client, db_session, json_headers, faker, helpers):
