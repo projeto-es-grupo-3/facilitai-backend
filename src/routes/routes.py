@@ -306,7 +306,7 @@ def search_books():
         nome_livro = filters.get('nome_livro', None)
         nome_autor = filters.get('nome_autor', None)
         genero = filters.get('genero', None)
-        preco_min = filters.get('preco_min, None')
+        preco_min = filters.get('preco_min', None)
         preco_max = filters.get('preco_max', None)
         aceita_trocas = filters.get('aceita_trocas', None)
 

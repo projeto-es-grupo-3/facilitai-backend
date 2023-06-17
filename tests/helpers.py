@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 
-from models.model import User
+from models.model import User, AnuncioLivro, AnuncioApartamento
 
 
 class Helpers:
@@ -23,6 +23,32 @@ class Helpers:
         db_session.commit()
 
         return new_user, password
+
+
+    @staticmethod
+    def create_book_ad(db_session, constructor):
+        anuncio = AnuncioLivro(constructor['titulo'], constructor['anunciante'], 
+                               constructor['descricao'], constructor['preco'], 
+                               constructor['status'], constructor['titulo_livro'], 
+                               constructor['autor'], constructor['genero'], 
+                               constructor['aceita_trocas']) 
+
+        db_session.add(anuncio)
+        db_session.commit()
+        return anuncio
+
+
+    @staticmethod
+    def create_ap_ad(db_session, constructor):
+        anuncio = AnuncioApartamento(constructor['titulo'], constructor['anunciante'], 
+                                     constructor['descricao'], constructor['preco'], 
+                                     constructor['status'], constructor['endereco'], 
+                                     constructor['area'], constructor['comodos'])
+
+        db_session.add(anuncio)
+        db_session.commit()
+        return anuncio
+
 
     @staticmethod
     def bearer_header(token):
