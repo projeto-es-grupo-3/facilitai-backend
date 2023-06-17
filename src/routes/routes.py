@@ -138,9 +138,9 @@ def create_ad():
 
         if not all([titulo, descricao, preco, titulo_livro, genero, autor]): abort(400, 'Todos os campos precisam ser preenchidos.')
 
-        new_livro = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, bool(aceita_trocas)) 
+        anuncio = AnuncioLivro(titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, bool(aceita_trocas)) 
         
-        db.session.add(new_livro)
+        db.session.add(anuncio)
         db.session.commit()
 
     elif categoria == 'apartamento':
@@ -150,15 +150,15 @@ def create_ad():
 
         if not all([titulo, descricao, preco, endereco, area, comodos]): abort(400,
                                                                                'Todos os campos precisam ser preenchidos.')
-        new_apartament = AnuncioApartamento(titulo, anunciante, descricao, preco, status, endereco, area, comodos)
+        anuncio = AnuncioApartamento(titulo, anunciante, descricao, preco, status, endereco, area, comodos)
         
-        db.session.add(new_apartament)
+        db.session.add(anuncio)
         db.session.commit()
     
     else: 
         abort(400, 'Não existem anuncios dessa categoria')
 
-    return jsonify(message='Anúncio criado.'), 201
+    return jsonify(message='Anúncio criado.', ad_id=anuncio.id), 201
 
 
 @bp.route(EDIT_AD, methods=['PUT'])
