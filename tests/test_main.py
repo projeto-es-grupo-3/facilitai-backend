@@ -382,9 +382,12 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
 
 # -------------------------------------------------------------------------------
 
-def test_create_ad_livro(client, db_session, AnuncioLivro):
-    
-    headers = {'Content-Type': 'application/json'}
+def test_create_ad_livro(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
     
     body = {
         "titulo": "Livro de estatística aplicada",
@@ -397,7 +400,7 @@ def test_create_ad_livro(client, db_session, AnuncioLivro):
         "aceitaTroca": "True"
     }
      
-    response = client.post(CREATE_AD, headers=headers, json=body)
+    response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 201
 
@@ -405,27 +408,31 @@ def test_create_ad_livro(client, db_session, AnuncioLivro):
     
     assert ad.titulo == body['titulo']
     assert ad.descricao == body['descricao']
-    assert ad.preco == body['preco']
+    assert ad.preco == float(body['preco'])
     assert ad.titulo_livro == body['tituloLivro']
     assert ad.autor == body['autor']
     assert ad.genero == body['genero']
-    assert ad.aceita_trocas == body['aceitaTroca']
+    assert ad.aceita_trocas == True
     
 
-def test_create_ad_apartamento(client, db_session, AnuncioApartamento):
-    headers = {'Content-Type': 'application/json'}
+def test_create_ad_apartamento(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
     
     body = {
         "titulo": "Apartamento 3 quartos perto da ufcg",
         "descricao": "apartamendo a 200m da ufcg com area de lazer e portaria",
-        "preco": "1000",
+        "preco": 1000,
         "categoria": "apartamento",
         "endereco": "Rua de Teste, 325, Universitário",
-        "area": "120 metros quadrados",
-        "comodos": "nove comodos"
+        "area": 120,
+        "comodos": 9
     }
      
-    response = client.post(CREATE_AD, headers=headers, json=body)
+    response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 201
 
@@ -433,14 +440,19 @@ def test_create_ad_apartamento(client, db_session, AnuncioApartamento):
     
     assert ad.titulo == body['titulo']
     assert ad.descricao == body['descricao']
-    assert ad.preco == body['preco']
+    assert ad.preco == float(body['preco'])
     assert ad.endereco == body['endereco']
-    assert ad.area == body['area']
-    assert ad.comodos == body['comodos']
+    assert ad.area == int(body['area'])
+    assert ad.comodos == int(body['comodos'])
     
 
-def test_create_ad_categoria_invalida(client, db_session):
-    headers = {'Content-Type': 'application/json'}
+def test_create_ad_categoria_invalida(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
     body = {
         "titulo": "Livro de estatística aplicada",
         "descricao": "Livro em perfeito estado, nunca usado",
@@ -452,42 +464,28 @@ def test_create_ad_categoria_invalida(client, db_session):
         "aceitaTroca": "True"
     }
    
-    response = client.post(CREATE_AD, headers=headers, json=body)
+    response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 400
 
 
-def test_create_ad_campos_incompletos(client, db_session):
-    headers = {'Content-Type': 'application/json'}
+def test_create_ad_campos_incompletos(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
     body = {
-        "titulo": "Livro de estatística aplicada",
-        "descricao": "Livro em perfeito estado, nunca usado",
-        "categoria": "Piscina",
-        "tituloLivro": "Estatística Básica",
-        "genero": "Educação",
-        "aceitaTroca": "True"
+        "titulo": None,
+        "descricao": "apartamendo a 200m da ufcg com area de lazer e portaria",
+        "preco": 1000,
+        "categoria": "apartamento",
+        "endereco": "Rua de Teste, 325, Universitário",
+        "area": 120,
+        "comodos": 9
     }
    
-    response = client.post(CREATE_AD, headers=headers, json=body)
+    response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 400
-
-
-# def test_edit_ad(client, db_session):
-#     headers = {'Content-Type': 'application/json'}
-#     body = {
-#         "id_anuncio": "1",
-#         "email": "test.email@gmai.com",
-#         "matricula": "110110110",
-#         "campus": "SEDE",
-#         "password": "123456",
-#         "curso": "CC"
-#     }
-
-#     response = client.post(REGISTER, headers=headers, json=body)
-
-#     assert response.status_code == 201
-
-#     user = db_session.query(User).first()
-#     assert user.email == body['email']
-#     assert user.username == body['username']

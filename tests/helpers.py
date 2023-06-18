@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash
 
 from models.model import User, AnuncioLivro, AnuncioApartamento, StatusAnuncio
+from conf.config import LOGIN
 
 
 class Helpers:
@@ -53,3 +54,17 @@ class Helpers:
     @staticmethod
     def bearer_header(token):
         return {'Authorization': f"Bearer {token}"}
+
+    @staticmethod
+    def login_user(user, password, client, json_headers):
+        body = {
+            "username": user.username,
+            "password": password
+        }
+
+        login = client.post(LOGIN, headers=json_headers, json=body)
+        login_json = login.json
+
+        access_token = login_json['access_token']
+
+        return access_token
