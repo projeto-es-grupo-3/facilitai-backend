@@ -251,16 +251,30 @@ def test_search_books_without_filters(client, db_session, json_headers, faker, h
     # Cria alguns anúncios de livros de teste no banco de dados
     user, password = helpers.create_user(db_session, faker)
 
-    livro1 = AnuncioLivro(titulo='Livro 1', anunciante=user.username, descricao='Descrição 1',
-                          preco=10.0, status=StatusAnuncio.AGUARDANDO_ACAO,
-                          titulo_livro='Livro A', autor='Autor A', genero='Gênero A', aceita_trocas=True)
+    livro1 = {
+        'titulo': 'Livro 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 10.0,
+        'titulo_livro': 'Livro A',
+        'autor': 'Autor X',
+        'genero': 'Ficção',
+        'aceita_trocas': True
+    }
 
-    livro2 = AnuncioLivro(titulo='Livro 2', anunciante=user.username, descricao='Descrição 2',
-                          preco=20.0, status=StatusAnuncio.AGUARDANDO_ACAO,
-                          titulo_livro='Livro B', autor='Autor B', genero='Gênero B', aceita_trocas=False)
+    livro2 = {
+        'titulo': 'Livro 2',
+        'anunciante': user,
+        'descricao': 'Descrição 2',
+        'preco': 20.0,
+        'titulo_livro': 'Livro B',
+        'autor': 'Autor Y',
+        'genero': 'Não-Ficção',
+        'aceita_trocas': False
+    }
 
-    db_session.add_all([livro1, livro2])
-    db_session.commit()
+    helpers.create_book_ad(db_session, livro1)
+    helpers.create_book_ad(db_session, livro2)
 
     response = client.get(SEARCH_BOOKS, headers=json_headers)
     assert response.status_code == 200
@@ -288,15 +302,29 @@ def test_search_books_without_filters(client, db_session, json_headers, faker, h
 def test_search_apartments_with_filters(client, db_session, json_headers, faker, helpers):
     user, password = helpers.create_user(db_session, faker)
 
-    # Cria alguns anúncios de apartamentos de teste no banco de dados
-    apartamento1 = AnuncioApartamento(titulo='Apartamento 1', anunciante=user.username, descricao='Descrição 1',
-                                      preco=1000.0,
-                                      status=StatusAnuncio.AGUARDANDO_ACAO, endereco='Endereço 1', area=50, comodos=2)
-    apartamento2 = AnuncioApartamento(titulo='Apartamento 2', anunciante=user.username, descricao='Descrição 2',
-                                      preco=2000.0,
-                                      status=StatusAnuncio.AGUARDANDO_ACAO, endereco='Endereço 2', area=80, comodos=3)
-    db_session.add_all([apartamento1, apartamento2])
-    db_session.commit()
+    apartamento1 = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user.username,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
+
+    apartamento2 = {
+        'titulo': 'Apartamento 2',
+        'anunciante': user.username,
+        'descricao': 'Descrição 2',
+        'preco': 2000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 2',
+        'area': 80,
+        'comodos': 3
+    }
+    helpers.create_ap_ad(db_session, apartamento1)
+    helpers.create_ap_ad(db_session, apartamento2)
 
     # Filtros para a pesquisa de apartamentos
     filters = {
@@ -321,16 +349,29 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
     # Cria alguns anúncios de apartamentos de teste no banco de dados
     user, password = helpers.create_user(db_session, faker)
 
-    # Cria alguns anúncios de apartamentos de teste no banco de dados
-    apartamento1 = AnuncioApartamento(titulo='Apartamento 1', anunciante=user.username, descricao='Descrição 1',
-                                      preco=1000.0,
-                                      status=StatusAnuncio.AGUARDANDO_ACAO, endereco='Endereço 1', area=50, comodos=2)
-    apartamento2 = AnuncioApartamento(titulo='Apartamento 2', anunciante=user.username, descricao='Descrição 2',
-                                      preco=2000.0,
-                                      status=StatusAnuncio.AGUARDANDO_ACAO, endereco='Endereço 2', area=80, comodos=3)
-    db_session.add_all([apartamento1, apartamento2])
-    db_session.commit()
+    apartamento1 = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user.username,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
 
+    apartamento2 = {
+        'titulo': 'Apartamento 2',
+        'anunciante': user.username,
+        'descricao': 'Descrição 2',
+        'preco': 2000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 2',
+        'area': 80,
+        'comodos': 3
+    }
+    helpers.create_ap_ad(db_session, apartamento1)
+    helpers.create_ap_ad(db_session, apartamento2)
     response = client.get(SEARCH_APARTMENTS, headers=json_headers)
     assert response.status_code == 200
 
