@@ -489,3 +489,45 @@ def test_create_ad_campos_incompletos(client, db_session, helpers, faker, json_h
     response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 400
+
+def test_incrase_rating_apartament(client, db_session, helpers, faker, json_headers):
+    user, password = helpers.create_user(db_session, faker)
+
+    apartamento1 = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
+
+    ad = helpers.create_ap_ad(db_session, apartamento1)
+
+    assert user.rating == 0 
+    increase_rating(ad.id)
+
+    assert user.rating == 1 
+
+def test_incrase_rating_book(client, db_session, helpers, faker, json_headers):
+    user, password = helpers.create_user(db_session, faker)
+
+    livro1 = {
+        'titulo': 'Livro 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 10.0,
+        'titulo_livro': 'Livro A',
+        'autor': 'Autor X',
+        'genero': 'Ficção',
+        'aceita_trocas': True
+    }
+
+    ad = helpers.create_book_ad(db_session, apartamento1)
+
+    assert user.rating == 0 
+    increase_rating(ad.id)
+
+    assert user.rating == 1
