@@ -379,3 +379,115 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
     assert apartamento_2['titulo'] == 'Apartamento 2'
     assert apartamento_2['preco'] == 2000.0
     assert apartamento_2['comodos'] == 3
+
+# -------------------------------------------------------------------------------
+
+def test_create_ad_livro(client, db_session, AnuncioLivro):
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    body = {
+        "titulo": "Livro de estatística aplicada",
+        "descricao": "Livro em perfeito estado, nunca usado",
+        "preco": "300",
+        "categoria": "livro",
+        "tituloLivro": "Estatística Básica",
+        "autor": "Bussab e Morettin",
+        "genero": "Educação",
+        "aceitaTroca": "True"
+    }
+     
+    response = client.post(CREATE_AD, headers=headers, json=body)
+    
+    assert response.status_code == 201
+
+    ad = db_session.query(AnuncioLivro).first()
+    
+    assert ad.titulo == body['titulo']
+    assert ad.descricao == body['descricao']
+    assert ad.preco == body['preco']
+    assert ad.titulo_livro == body['tituloLivro']
+    assert ad.autor == body['autor']
+    assert ad.genero == body['genero']
+    assert ad.aceita_trocas == body['aceitaTroca']
+    
+
+def test_create_ad_apartamento(client, db_session, AnuncioApartamento):
+    headers = {'Content-Type': 'application/json'}
+    
+    body = {
+        "titulo": "Apartamento 3 quartos perto da ufcg",
+        "descricao": "apartamendo a 200m da ufcg com area de lazer e portaria",
+        "preco": "1000",
+        "categoria": "apartamento",
+        "endereco": "Rua de Teste, 325, Universitário",
+        "area": "120 metros quadrados",
+        "comodos": "nove comodos"
+    }
+     
+    response = client.post(CREATE_AD, headers=headers, json=body)
+    
+    assert response.status_code == 201
+
+    ad = db_session.query(AnuncioApartamento).first()
+    
+    assert ad.titulo == body['titulo']
+    assert ad.descricao == body['descricao']
+    assert ad.preco == body['preco']
+    assert ad.endereco == body['endereco']
+    assert ad.area == body['area']
+    assert ad.comodos == body['comodos']
+    
+
+def test_create_ad_categoria_invalida(client, db_session):
+    headers = {'Content-Type': 'application/json'}
+    body = {
+        "titulo": "Livro de estatística aplicada",
+        "descricao": "Livro em perfeito estado, nunca usado",
+        "preco": "300",
+        "categoria": "Piscina",
+        "tituloLivro": "Estatística Básica",
+        "autor": "Bussab e Morettin",
+        "genero": "Educação",
+        "aceitaTroca": "True"
+    }
+   
+    response = client.post(CREATE_AD, headers=headers, json=body)
+    
+    assert response.status_code == 400
+
+
+def test_create_ad_campos_incompletos(client, db_session):
+    headers = {'Content-Type': 'application/json'}
+    body = {
+        "titulo": "Livro de estatística aplicada",
+        "descricao": "Livro em perfeito estado, nunca usado",
+        "categoria": "Piscina",
+        "tituloLivro": "Estatística Básica",
+        "genero": "Educação",
+        "aceitaTroca": "True"
+    }
+   
+    response = client.post(CREATE_AD, headers=headers, json=body)
+    
+    assert response.status_code == 400
+
+
+# def test_edit_ad(client, db_session):
+#     headers = {'Content-Type': 'application/json'}
+#     body = {
+#         "id_anuncio": "1",
+#         "email": "test.email@gmai.com",
+#         "matricula": "110110110",
+#         "campus": "SEDE",
+#         "password": "123456",
+#         "curso": "CC"
+#     }
+
+#     response = client.post(REGISTER, headers=headers, json=body)
+
+#     assert response.status_code == 201
+
+#     user = db_session.query(User).first()
+#     assert user.email == body['email']
+#     assert user.username == body['username']
