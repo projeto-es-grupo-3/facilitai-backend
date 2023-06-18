@@ -276,27 +276,19 @@ def test_search_books_without_filters(client, db_session, json_headers, faker, h
     helpers.create_book_ad(db_session, livro1)
     helpers.create_book_ad(db_session, livro2)
 
-    response = client.get(SEARCH_BOOKS, headers=json_headers)
+    response = client.get(SEARCH_BOOKS, headers=json_headers, json={})
     assert response.status_code == 200
 
     data = response.json
     assert len(data) == 2
 
     livro_1 = data[0]
-    assert livro_1['titulo'] == 'Livro 1'
-    assert livro_1['preco'] == 10.0
-    assert livro_1['titulo_livro'] == 'Livro A'
-    assert livro_1['autor'] == 'Autor A'
-    assert livro_1['genero'] == 'Gênero A'
-    assert livro_1['aceita_trocas'] is True
+    del livro_1['status'], livro_1['anunciante'], livro1['anunciante']
+    assert livro1 == livro_1
 
     livro_2 = data[1]
-    assert livro_2['titulo'] == 'Livro 2'
-    assert livro_2['preco'] == 20.0
-    assert livro_2['titulo_livro'] == 'Livro B'
-    assert livro_2['autor'] == 'Autor B'
-    assert livro_2['genero'] == 'Gênero B'
-    assert livro_2['aceita_trocas'] is False
+    del livro_2['status'], livro_2['anunciante'], livro2['anunciante']
+    assert livro2 == livro_2
 
 
 def test_search_apartments_with_filters(client, db_session, json_headers, faker, helpers):
@@ -304,7 +296,7 @@ def test_search_apartments_with_filters(client, db_session, json_headers, faker,
 
     apartamento1 = {
         'titulo': 'Apartamento 1',
-        'anunciante': user.username,
+        'anunciante': user,
         'descricao': 'Descrição 1',
         'preco': 1000.0,
         'status': StatusAnuncio.AGUARDANDO_ACAO,
@@ -315,7 +307,7 @@ def test_search_apartments_with_filters(client, db_session, json_headers, faker,
 
     apartamento2 = {
         'titulo': 'Apartamento 2',
-        'anunciante': user.username,
+        'anunciante': user,
         'descricao': 'Descrição 2',
         'preco': 2000.0,
         'status': StatusAnuncio.AGUARDANDO_ACAO,
@@ -351,7 +343,7 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
 
     apartamento1 = {
         'titulo': 'Apartamento 1',
-        'anunciante': user.username,
+        'anunciante': user,
         'descricao': 'Descrição 1',
         'preco': 1000.0,
         'status': StatusAnuncio.AGUARDANDO_ACAO,
@@ -362,7 +354,7 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
 
     apartamento2 = {
         'titulo': 'Apartamento 2',
-        'anunciante': user.username,
+        'anunciante': user,
         'descricao': 'Descrição 2',
         'preco': 2000.0,
         'status': StatusAnuncio.AGUARDANDO_ACAO,
@@ -372,7 +364,7 @@ def test_search_apartments_without_filters(client, db_session, json_headers, fak
     }
     helpers.create_ap_ad(db_session, apartamento1)
     helpers.create_ap_ad(db_session, apartamento2)
-    response = client.get(SEARCH_APARTMENTS, headers=json_headers)
+    response = client.get(SEARCH_APARTMENTS, headers=json_headers, json={})
     assert response.status_code == 200
 
     data = response.json
