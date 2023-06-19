@@ -63,8 +63,8 @@ def test_fav_ad_already_favorited(client, helpers, db_session, faker, json_heade
     favorite = {
         "anuncio_id": ad.id
     }
-    client.post(FAV_AD, header=json_headers, json=favorite)
-    response = client.post(FAV_AD, header=json_headers, json=favorite)
+    client.post(FAV_AD, headers=json_headers, json=favorite)
+    response = client.post(FAV_AD, headers=json_headers, json=favorite)
 
     error_msg = "O anúncio já está nos favoritos do usuário."
     assert response.status_code == 400
