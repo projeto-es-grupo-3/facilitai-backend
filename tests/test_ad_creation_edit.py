@@ -4,7 +4,8 @@ from models.model import AnuncioLivro, AnuncioApartamento, StatusAnuncio, Anunci
 from conf.config import (
     CREATE_AD,
     EDIT_AD,
-    SEARCH_APARTMENTS
+    SEARCH_APARTMENTS,
+    SEARCH_BOOKS
 )
 
 
@@ -117,7 +118,7 @@ def test_create_ad_campos_incompletos(client, db_session, helpers, faker, json_h
     assert response.status_code == 400
 
 
-def test_edit_ad(client, db_session, helpers, faker, json_headers):
+def test_edit_ad_apartment(client, db_session, helpers, faker, json_headers):
 
     user, password = helpers.create_user(db_session, faker)
     access_token = helpers.login_user(user, password, client, json_headers)
@@ -145,6 +146,39 @@ def test_edit_ad(client, db_session, helpers, faker, json_headers):
 
     response = client.put(EDIT_AD, headers=json_headers, json=edit)
     edited_ads = client.get(SEARCH_APARTMENTS, json={})
+
+    assert response.status_code == 200
+    assert edit['descricao'] in edited_ads.text
+
+
+def test_edit_ad_book(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
+    livro = {
+        'titulo': 'Livro 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 10.0,
+        'titulo_livro': 'Livro A',
+        'autor': 'Autor X',
+        'genero': 'Ficção',
+        'aceita_trocas': True
+    }
+
+    ad = helpers.create_book_ad(db_session, livro)
+
+    edit = {
+        'id_anuncio': ad.id,
+        'descricao': str(uuid.uuid4()),
+        'categoria': 'livro'
+    }
+
+    response = client.put(EDIT_AD, headers=json_headers, json=edit)
+    edited_ads = client.get(SEARCH_BOOKS, json={})
 
     assert response.status_code == 200
     assert edit['descricao'] in edited_ads.text
