@@ -3,7 +3,8 @@ from conf.config import (
     REGISTER,
     LOGIN,
     LOGOUT,
-    GET_FAV_ADS
+    GET_FAV_ADS,
+    UPDATE
 )
 
 
@@ -191,3 +192,29 @@ def test_user_logout_success(client, helpers, db_session, faker, json_headers):
 
     assert revoked_response.status_code == 401
     assert revoked_msg in revoked_response.text
+
+
+def test_user_updating(helpers, client, db_session, faker, json_headers):
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
+    update = {
+        "username": "edited",
+        "campus": None,
+        "password": None,
+        "curso": None,
+    }
+
+    response = client.post(UPDATE, headers=json_headers, json=update)
+
+    assert response.status_code == 204
+
+    body = {
+        "username": update['username'],
+        "password": password
+    }
+
+    login = client.post(LOGIN, headers=json_headers, json=body)
+
+    assert login.status_code == 200
