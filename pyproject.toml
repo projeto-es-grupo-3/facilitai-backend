@@ -29,5 +29,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.coverage.run]
 omit = [
     "*/__init__.py",
-    "src/setup.py"
+    "src/setup.py",
+    "*/utils.py"
 ]
