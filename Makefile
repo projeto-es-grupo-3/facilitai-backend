@@ -17,4 +17,4 @@ test:
 	poetry run pytest
 
 coverage:
-	poetry run pytest --cov=src tests/test_main.py --cov-report html
+	poetry run pytest --cov=src tests/ --cov-report html
