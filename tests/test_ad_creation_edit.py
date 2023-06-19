@@ -1,6 +1,10 @@
-from models.model import AnuncioLivro, AnuncioApartamento
+import uuid
+
+from models.model import AnuncioLivro, AnuncioApartamento, StatusAnuncio, Anuncio
 from conf.config import (
-    CREATE_AD
+    CREATE_AD,
+    EDIT_AD,
+    SEARCH_APARTMENTS
 )
 
 
@@ -111,3 +115,36 @@ def test_create_ad_campos_incompletos(client, db_session, helpers, faker, json_h
     response = client.post(CREATE_AD, headers=json_headers, json=body)
     
     assert response.status_code == 400
+
+
+def test_edit_ad(client, db_session, helpers, faker, json_headers):
+
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
+    apartamento = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
+
+    ad = helpers.create_ap_ad(db_session, apartamento)
+
+    edit = {
+        'id_anuncio': ad.id,
+        'descricao': str(uuid.uuid4()),
+        'categoria': 'apartamento'
+    }
+
+    response = client.put(EDIT_AD, headers=json_headers, json=edit)
+    edited_ads = client.get(SEARCH_APARTMENTS, json={})
+
+    assert response.status_code == 200
+    assert edit['descricao'] in edited_ads.text
