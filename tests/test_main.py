@@ -8,8 +8,57 @@ from conf.config import (
     DELETE_AD,
     GET_FAV_ADS,
     SEARCH_BOOKS,
-    SEARCH_APARTMENTS
+    SEARCH_APARTMENTS,
+    FAV_AD
 )
+
+
+
+def test_fav_ad_success(client, helpers, db_session, faker, json_headers):
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
+    apartamento1 = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
+    helpers.create_ap_ad(db_session, apartamento1)
+
+    response = client.post(FAV_AD, header=json_headers, json=1)
+
+    assert response.status_code == 200
+
+
+def test_fav_ad_already_favorited(client, helpers, db_session, faker, json_headers):
+    user, password = helpers.create_user(db_session, faker)
+    access_token = helpers.login_user(user, password, client, json_headers)
+    json_headers['Authorization'] = f'Bearer {access_token}'
+
+    apartamento1 = {
+        'titulo': 'Apartamento 1',
+        'anunciante': user,
+        'descricao': 'Descrição 1',
+        'preco': 1000.0,
+        'status': StatusAnuncio.AGUARDANDO_ACAO,
+        'endereco': 'Endereço 1',
+        'area': 50,
+        'comodos': 2
+    }
+    helpers.create_ap_ad(db_session, apartamento1)
+
+    response = client.post(FAV_AD, header=json_headers, json=1)
+    response2 = client.post(FAV_AD, header=json_headers, json=1)
+
+    error_msg = "O anuncio ja foi favoritado"
+    assert response2.status_code == 400
+    assert error_msg in response2.text
 
 
 def test_user_register_success(client, db_session, json_headers):
