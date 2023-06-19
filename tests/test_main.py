@@ -29,11 +29,18 @@ def test_fav_ad_success(client, helpers, db_session, faker, json_headers):
         'area': 50,
         'comodos': 2
     }
-    helpers.create_ap_ad(db_session, apartamento1)
+    ad = helpers.create_ap_ad(db_session, apartamento1)
 
-    response = client.post(FAV_AD, header=json_headers, json=1)
+    favorite = {
+        "anuncio_id": ad.id
+    }
+
+    response = client.post(FAV_AD, headers=json_headers, json=favorite)
 
     assert response.status_code == 200
+
+    ad_fav = user.anuncios_favoritos[0]
+    assert ad_fav.id == ad.id
 
 
 def test_fav_ad_already_favorited(client, helpers, db_session, faker, json_headers):
@@ -51,14 +58,17 @@ def test_fav_ad_already_favorited(client, helpers, db_session, faker, json_heade
         'area': 50,
         'comodos': 2
     }
-    helpers.create_ap_ad(db_session, apartamento1)
 
-    response = client.post(FAV_AD, header=json_headers, json=1)
-    response2 = client.post(FAV_AD, header=json_headers, json=1)
+    ad = helpers.create_ap_ad(db_session, apartamento1)
+    favorite = {
+        "anuncio_id": ad.id
+    }
+    client.post(FAV_AD, header=json_headers, json=favorite)
+    response = client.post(FAV_AD, header=json_headers, json=favorite)
 
-    error_msg = "O anuncio ja foi favoritado"
-    assert response2.status_code == 400
-    assert error_msg in response2.text
+    error_msg = "O anúncio já está nos favoritos do usuário."
+    assert response.status_code == 400
+    assert error_msg in response.text
 
 
 def test_user_register_success(client, db_session, json_headers):
