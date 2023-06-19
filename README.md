@@ -20,6 +20,12 @@ poetry shell
 
 # roda o serviço
 make run
+
+# roda os testes
+make test
+
+# testa a cobertura e torna acessível o report de cobertura em htmlcov/index.html
+make coverage
 ```
 
 O serviço é hosteado, por default de Flask, na porta 5000 do localhost.
