@@ -491,6 +491,5 @@ def upload_profile_picture():
 
 
 @bp.route(IMAGE, methods=['GET'])
-@jwt_required()
 def get_image(file_name):
     return send_file(Path(IMAGE_PATH + file_name).expanduser(), mimetype='image/png')

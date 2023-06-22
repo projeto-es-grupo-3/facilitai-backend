@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 
+from conf.config import IMAGE
+
 
 db = SQLAlchemy()
 
@@ -122,7 +124,8 @@ class AnuncioLivro(Anuncio, db.Model):
             'autor': self.autor,
             'genero': self.genero,
             'status': self.status,
-            'aceita_trocas': self.aceita_trocas
+            'aceita_trocas': self.aceita_trocas,
+            'image_location': f'{IMAGE.removesuffix("<file_name>")}{self.ad_img}'
         }
 
     def get_to_dict(self):
@@ -135,7 +138,8 @@ class AnuncioLivro(Anuncio, db.Model):
             'autor': self.autor,
             'genero': self.genero,
             'status': self.status,
-            'aceita_trocas': self.aceita_trocas
+            'aceita_trocas': self.aceita_trocas,
+            'image_location': f'{IMAGE.removesuffix("<file_name>")}{self.ad_img}'
         }
 
     def __init__(self, titulo, anunciante, descricao, preco, status, titulo_livro, autor, genero, aceita_trocas=False):
@@ -169,7 +173,8 @@ class AnuncioApartamento(Anuncio, db.Model):
             'endereco': self.endereco,
             'area': self.area,
             'comodos': self.comodos,
-            'status': self.status
+            'status': self.status,
+            'image_location': f'{IMAGE.removesuffix("<file_name>")}{self.ad_img}'
         }
 
     def get_to_dict(self):
@@ -181,7 +186,8 @@ class AnuncioApartamento(Anuncio, db.Model):
             'endereco': self.endereco,
             'area': self.area,
             'comodos': self.comodos,
-            'status': self.status
+            'status': self.status,
+            'image_location': f'{IMAGE.removesuffix("<file_name>")}{self.ad_img}'
         }
 
     def __init__(self, titulo, anunciante, descricao, preco, status, endereco, area, comodos):
