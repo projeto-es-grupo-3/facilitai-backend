@@ -294,7 +294,7 @@ def update_user():
     return jsonify(message='Usuário atualizado com sucesso.'), 204
 
 
-@bp.route(SEARCH_BOOKS, methods=['GET'])
+@bp.route(SEARCH_BOOKS, methods=['POST'])
 def search_books():
 
     # Iniciar com uma consulta base para recuperar os anúncios de livros
@@ -339,7 +339,7 @@ def search_books():
     return jsonify(livros_serial)
 
 
-@bp.route(SEARCH_APARTMENTS, methods=['GET'])
+@bp.route(SEARCH_APARTMENTS, methods=['POST'])
 def search_apartments():
     """Realiza a filtragem de imóveis anunciados com base nos filtros fornecidos no JSON.
 
